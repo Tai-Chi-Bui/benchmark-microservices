@@ -1,12 +1,67 @@
+"use client";
+
 import Link from 'next/link';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLogin } from '@/app/_api/auth/login';
+import { useRouter } from 'next/navigation';
 
 const SignIn = () => {
+  const mutation = useLogin();
+  const router = useRouter();
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [isError, setIsError] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [countdown, setCountdown] = useState(3); // State for countdown timer
+
+  useEffect(() => {
+    if (showModal && !isError) {
+      const timer = setInterval(() => {
+        setCountdown((prevCount) => {
+          if (prevCount <= 1) {
+            clearInterval(timer);
+            router.push('/home');
+            return 0;
+          }
+          return prevCount - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [showModal, isError, router]);
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget as HTMLFormElement);
+
+    formData.append('rememberMe', String(rememberMe));
+
+    mutation.mutate(formData, {
+      onError: (error: Error) => {
+        setModalMessage(`Error: ${error.message}`);
+        setIsError(true);
+        setShowModal(true);
+      },
+      onSuccess: (data) => {
+        const expires = rememberMe ? 30 : 1;
+        const expiresDate = new Date();
+        expiresDate.setDate(expiresDate.getDate() + expires);
+
+        document.cookie = `authToken=${data.token}; expires=${expiresDate.toUTCString()}; path=/; secure; samesite=strict`;
+
+        setModalMessage(data.message ?? "Log in successfully!");
+        setIsError(false);
+        setShowModal(true);
+      },
+    });
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center text-gray-900">Sign In</h2>
-        <form className="mt-8 space-y-6">
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm">
             <div className="mb-4">
               <label htmlFor="username" className="block text-sm font-medium text-gray-700">
@@ -15,7 +70,7 @@ const SignIn = () => {
               <input
                 id="username"
                 name="username"
-                type="username"
+                type="text"
                 autoComplete="username"
                 required
                 className="w-full px-3 py-2 mt-1 border rounded-md border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
@@ -41,6 +96,8 @@ const SignIn = () => {
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
                 className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
               />
               <label htmlFor="remember-me" className="block ml-2 text-sm text-gray-900">
@@ -71,6 +128,21 @@ const SignIn = () => {
           </div>
         </form>
       </div>
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h3 className={`text-2xl font-medium mb-8 ${isError ? 'text-red-600' : 'text-blue-900'}`}>
+              {modalMessage}
+            </h3>
+            {!isError && (
+              <p className="text-center text-gray-700">
+                Redirecting in {countdown} second{countdown > 1 ? 's' : ''}...
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
