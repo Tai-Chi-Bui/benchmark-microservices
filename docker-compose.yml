@@ -21,10 +21,11 @@ services:
     build: ./auth
     ports:
       - "3000:3000"
-    env_file:
-      - ./auth/.env
+    # env_file:
+    #   - ./auth/.env
     environment:
       - MONGODB_AUTH_URI=mongodb://user:password@mongodb:27017
+      - JWT_SECRET=3sU_b9qz_fu5jx2W3e-rI5SrNcqBkgZeo4SzxRTIPfc4P9_bHMf5hcABScG1mpV41eefPloAgWw50RMzYcBCAQ
     networks:
       - ecommerce
     healthcheck:
@@ -57,11 +58,12 @@ services:
     depends_on:
       - rabbitmq
       - mongodb
-    env_file:
-      - ./order/.env
+    # env_file:
+    #   - ./order/.env
     environment:
       - RABBITMQ_URL=amqp://rabbitmq:5672
       - MONGODB_ORDER_URI=mongodb://user:password@mongodb:27017
+      - JWT_SECRET=3sU_b9qz_fu5jx2W3e-rI5SrNcqBkgZeo4SzxRTIPfc4P9_bHMf5hcABScG1mpV41eefPloAgWw50RMzYcBCAQ
     networks:
       - ecommerce
     healthcheck:
@@ -77,11 +79,12 @@ services:
     depends_on:
       - rabbitmq
       - mongodb
-    env_file:
-      - ./product/.env
+    # env_file:
+    #   - ./product/.env
     environment:
       - RABBITMQ_URL=amqp://rabbitmq:5672
       - MONGODB_PRODUCT_URI=mongodb://user:password@mongodb:27017
+      - JWT_SECRET=3sU_b9qz_fu5jx2W3e-rI5SrNcqBkgZeo4SzxRTIPfc4P9_bHMf5hcABScG1mpV41eefPloAgWw50RMzYcBCAQ
     networks:
       - ecommerce
     healthcheck:
