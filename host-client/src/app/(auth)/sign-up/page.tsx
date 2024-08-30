@@ -1,11 +1,14 @@
-"use client"
+"use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useSignUp } from '@/app/_api/auth/signup'; // Import your custom hook
 
 const SignUp = () => {
   const mutation = useSignUp();
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [isError, setIsError] = useState(false); // New state to differentiate between success and error
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -13,12 +16,16 @@ const SignUp = () => {
 
     mutation.mutate(formData, {
       onError: (error: Error) => {
-        // Handle the error at the component level
-        alert(`Error: ${error.message}`);
+        // Set error message and show modal
+        setModalMessage(`Error: ${error.message}`);
+        setIsError(true);
+        setShowModal(true);
       },
       onSuccess: (data) => {
-        // Handle successful sign-up
-        alert(data.message);
+        // Set success message and show modal
+        setModalMessage(data.message ?? "Account created successfully!");
+        setIsError(false);
+        setShowModal(true);
       },
     });
   };
@@ -37,19 +44,6 @@ const SignUp = () => {
                 id="username"
                 name="username"
                 type="text"
-                required
-                className="w-full px-3 py-2 mt-1 border rounded-md border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              />
-            </div>
-            <div className="mb-4">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
                 required
                 className="w-full px-3 py-2 mt-1 border rounded-md border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
@@ -99,6 +93,31 @@ const SignUp = () => {
           </div>
         </form>
       </div>
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h3 className={`text-2xl font-medium mb-8 ${isError ? 'text-red-600' : 'text-blue-900'}`}>
+              {modalMessage}
+            </h3>
+            <div className='w-full flex justify-end gap-2'>
+              {!isError && (
+                <Link href="/sign-in">
+                  <button className="p-2 text-xs font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    Go to Sign In
+                  </button>
+                </Link>
+              )}
+              <button
+                onClick={() => setShowModal(false)}
+                className="p-2 text-xs font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
