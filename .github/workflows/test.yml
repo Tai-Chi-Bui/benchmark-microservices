@@ -1,0 +1,37 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3.2.0
+    - name: Create .env file
+      run: |
+        echo "MONGODB_AUTH_URI=${{ secrets.MONGODB_PRODUCT_URI }}" >> auth/.env
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> auth/.env
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> product/.env
+        echo "MONGODB_PRODUCT_URI=${{ secrets.MONGODB_PRODUCT_URI }}" >> product/.env
+        echo "LOGIN_TEST_USER=${{ secrets.LOGIN_TEST_USER }}" >> product/.env
+        echo "LOGIN_TEST_PASSWORD=${{ secrets.LOGIN_TEST_PASSWORD }}" >> product/.env
+
+    - name: Install dependencies
+      run: |
+        cd auth
+        npm ci
+        cd ..
+        cd product
+        npm ci
+        cd ..
+        npm ci
+    - name: Run tests for auth
+      run : |
+        cd auth
+        npm test
+    - name: Run tests for product
+      run: |
+        cd auth &&
+        npm start &
+        cd product
+        npm test

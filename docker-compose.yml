@@ -1,0 +1,126 @@
+version: "3.8"
+
+services:
+  # uncomment if you want to build client 
+  # host-client:
+  #   container_name: host-client-prod
+  #   image: host-client-prod:latest
+  #   build:
+  #     context: ./host-client
+  #     target: production
+  #   env_file:
+  #     - ./host-client/.env.production
+  #   networks:
+  #     - ecommerce
+  #   ports:
+  #     - "3005:3006"
+  #   volumes:
+  #     - /app/node_modules
+  #     - /app/.next
+  auth:
+    build: ./auth
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./auth/.env
+    environment:
+      - MONGODB_AUTH_URI=mongodb://user:password@mongodb:27017
+    networks:
+      - ecommerce
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3.8-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - ecommerce
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  order:
+    build: ./order
+    ports:
+      - "3002:3002"
+    depends_on:
+      - rabbitmq
+      - mongodb
+    env_file:
+      - ./order/.env
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - MONGODB_ORDER_URI=mongodb://user:password@mongodb:27017
+    networks:
+      - ecommerce
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "3002"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  product:
+    build: ./product
+    ports:
+      - "3001:3001"
+    depends_on:
+      - rabbitmq
+      - mongodb
+    env_file:
+      - ./product/.env
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - MONGODB_PRODUCT_URI=mongodb://user:password@mongodb:27017
+    networks:
+      - ecommerce
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "3001"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "3003:3003"
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    networks:
+      - ecommerce
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "3003"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  mongodb:
+    image: mongodb/mongodb-community-server:latest
+    container_name: 'mongodb'
+    ports:
+      - 27017:27017
+    volumes:
+      - ~/.docker-conf/mongodb/data/:/data/db
+    environment:
+      MONGODB_INITDB_ROOT_USERNAME: user
+      MONGODB_INITDB_ROOT_PASSWORD: password
+    networks:
+      - ecommerce
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+networks:
+  ecommerce:
