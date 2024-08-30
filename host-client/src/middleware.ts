@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { jwtVerify } from 'jose';
 
 // Define your secret key for JWT verification
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET_KEY = new TextEncoder().encode(JWT_SECRET);
 
 // Define protected, restricted, and public routes
 const protectedRoutes = ['/blogs']; // Routes that require authentication
@@ -36,18 +37,19 @@ export default function middleware(req: NextRequest) {
   const isValidToken = (token: string | undefined): boolean => {
     if (!token) return false;
 
-    // try {
-    //   jwt.verify(token, JWT_SECRET);
-    //   return true;
-    // } catch (error) {
-    //   return false;
-    // }
-    return true
+    try {
+      jwtVerify(token, JWT_SECRET_KEY);
+      return true;
+    } catch (error) {
+      console.log("jwt verification error: ", error)
+      return false;
+    }
   };
 
   // console.log("token", token)
   // console.log("isValidToken", isValidToken(token))
   // console.log("path", pathname)
+  // console.log("JWT_SECRET", JWT_SECRET)
 
   // If the route is protected and there's no valid token, redirect to /sign-out
   if (isProtectedRoute && !isValidToken(token)) {
