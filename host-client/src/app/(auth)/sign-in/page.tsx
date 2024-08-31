@@ -48,7 +48,11 @@ const SignIn = () => {
         const expiresDate = new Date();
         expiresDate.setDate(expiresDate.getDate() + expires);
 
-        document.cookie = `authToken=${data.token}; expires=${expiresDate.toUTCString()}; path=/; secure; samesite=strict`;
+        // Check if running on HTTPS to set the secure attribute
+        const secure = window.location.protocol === 'https:' ? 'secure;' : '';
+
+        document.cookie = `authToken=${data.token}; expires=${expiresDate.toUTCString()}; path=/; ${secure} samesite=strict`;
+
 
         setModalMessage(data.message ?? "Log in successfully!");
         setIsError(false);

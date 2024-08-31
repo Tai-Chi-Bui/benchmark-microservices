@@ -1,32 +1,57 @@
+// middleware.ts
+
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { isAuthenticated } from '@/app/_utils/auth';
+import { isValidToken, getUserRole } from '@/app/_utils/auth'; // Assuming getUserRole is a utility function to get the user's role
 
-// Define protected, restricted, and public routes
+// Define protected, restricted, and role-based routes
 const protectedRoutes = ['/blogs']; // Routes that require authentication
-const restrictedRoutes = ['/sign-up', '/sign-in']; // Routes accessible only when not authenticated
-const publicRoutes = ['/home', '/sign-out']; // Example of public routes
+const authRoutes = ['/sign-up', '/sign-in']; // Routes accessible only when not authenticated
+const adminRoutes = ['/admin-dashboard']; // Routes accessible only by users with 'admin' role
+const publicRoutes = ['/unauthenticated', '/unauthorized', '/home'];
+
+type Roles = 'user' | 'admin'
+function generateMatcher(routes: string[]) {
+  // Generate the matcher array from routes
+  return routes.map((route) => {
+    return route.endsWith('*') ? route : `${route}*`;
+  });
+}
 
 export default function middleware(req: NextRequest) {
-  // Retrieve the token from cookies and get its value as a string
   const token = req.cookies.get('authToken')?.value;
-
-  // Get the current pathname from the request
   const { pathname } = req.nextUrl;
 
-  // Use the utility function to determine if authentication is required
-  const { shouldRedirect, redirectUrl } = isAuthenticated(pathname, token, protectedRoutes, restrictedRoutes, publicRoutes);
+  const isAuthenticated = isValidToken(token);
+  const userRole: any = isAuthenticated ? getUserRole(token) : 'user'; // Fetch user role if authenticated
 
-  if (shouldRedirect) {
-    return NextResponse.redirect(new URL(redirectUrl, req.url));
+  // Handle unauthenticated users
+  if (!isAuthenticated) {
+    if (!authRoutes.some(route => pathname.startsWith(route)) && !publicRoutes.some(route => pathname.startsWith(route))) {
+      return NextResponse.redirect(new URL('/unauthenticated', req.url));
+    }
   }
 
-  // Allow the request if no redirection is needed
+  // Handle authenticated users
+  if (isAuthenticated) {
+    if (authRoutes.some(route => pathname.startsWith(route))) {
+      return NextResponse.redirect(new URL('/', req.url));
+    }
+
+    if (adminRoutes.some(route => pathname.startsWith(route))) {
+      if (userRole !== 'admin') {
+        return NextResponse.redirect(new URL('/unauthorized', req.url));
+      }
+    }
+  }
+
   return NextResponse.next();
 }
 
+
 export const config = {
   matcher: [
-    '/:path*', // Match all routes
+    '/((?!_next|api/auth).*)(.+)'
   ],
-};
+}
+

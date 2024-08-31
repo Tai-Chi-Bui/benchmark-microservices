@@ -46,3 +46,5 @@ export const isAuthenticated = (pathname: string, token: string | undefined, pro
 
   return { shouldRedirect: false, redirectUrl: '' };
 };
+
+export const getUserRole =  (_token: string | undefined) => 'user'
