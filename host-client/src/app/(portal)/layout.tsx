@@ -2,13 +2,27 @@
 
 import React, { ReactNode } from 'react';
 import Link from 'next/link';
-import { HomeIcon, BookOpenIcon, ArrowDownOnSquareIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, BookOpenIcon, ArrowDownOnSquareIcon, ArrowUpOnSquareIcon } from '@heroicons/react/24/outline';
+import { cookies } from 'next/headers'; // Import cookies to read server-side
+import { isValidToken } from '../_utils/auth';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
+// Define a server-side function to check if the user is authenticated
+const checkAuthentication = (): boolean => {
+  // Retrieve the token from cookies
+  const cookieStore = cookies();
+  const token = cookieStore.get('authToken')?.value;
+
+  // Check if the token is valid
+  return isValidToken(token);
+};
+
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const isAuthenticated = checkAuthentication(); // Check authentication status
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       {/* Header */}
@@ -33,10 +47,22 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </Link>
           </li>
           <li className="flex items-center space-x-2">
-            <ArrowDownOnSquareIcon className="h-5 w-5" />
-            <Link href="/sign-out">
-              <span className="cursor-pointer hover:text-gray-300">Sign Out</span>
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <ArrowDownOnSquareIcon className="h-5 w-5" />
+                <Link href="/sign-out">
+                  <span className="cursor-pointer hover:text-gray-300">Sign Out</span>
+                </Link>
+              </>
+            ) : (
+
+              <>
+                <ArrowUpOnSquareIcon className="h-5 w-5" />
+                <Link href="/sign-in">
+                  <span className="cursor-pointer hover:text-gray-300">Sign In</span>
+                </Link>
+              </>
+            )}
           </li>
         </ul>
       </nav>

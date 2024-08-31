@@ -12,7 +12,7 @@ const SignIn = () => {
   const [modalMessage, setModalMessage] = useState('');
   const [isError, setIsError] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [countdown, setCountdown] = useState(3); // State for countdown timer
+  const [countdown, setCountdown] = useState(2); // State for countdown timer
 
   useEffect(() => {
     if (showModal && !isError) {
