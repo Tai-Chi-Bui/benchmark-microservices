@@ -2,7 +2,7 @@
 
 import React, { ReactNode } from 'react';
 import Link from 'next/link';
-import { HomeIcon, BookOpenIcon, ArrowDownOnSquareIcon, ArrowUpOnSquareIcon, CubeIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, BookOpenIcon, ArrowDownOnSquareIcon, ArrowUpOnSquareIcon, CubeIcon, ListBulletIcon } from '@heroicons/react/24/outline';
 import { cookies } from 'next/headers'; // Import cookies to read server-side
 import { isValidToken } from '../_utils/auth';
 
@@ -44,6 +44,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <BookOpenIcon className="h-5 w-5" />
             <Link href="/blogs">
               <span className="cursor-pointer hover:text-gray-300">Blogs</span>
+            </Link>
+          </li>
+          <li className="flex items-center space-x-2">
+            <ListBulletIcon className="h-5 w-5" />
+            <Link href="/products">
+              <span className="cursor-pointer hover:text-gray-300">Products</span>
             </Link>
           </li>
           <li className="flex items-center space-x-2">

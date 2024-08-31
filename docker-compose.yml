@@ -45,6 +45,9 @@ services:
       - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
     networks:
       - ecommerce
+    environment:
+      RABBITMQ_DEFAULT_USER: taibui
+      RABBITMQ_DEFAULT_PASS: 12
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 30s

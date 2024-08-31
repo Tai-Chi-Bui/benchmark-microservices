@@ -5,7 +5,7 @@ import type { NextRequest } from 'next/server';
 import { isValidToken, getUserRole } from '@/app/_utils/auth';
 
 // Define protected, restricted, and role-based routes
-const protectedRoutes = ['/blogs']; // Routes that require authentication
+const protectedRoutes = ['/blogs', '/products']; // Routes that require authentication
 const authRoutes = ['/sign-up', '/sign-in']; // Routes accessible only when not authenticated
 const adminRoutes = ['/admin-dashboard']; // Routes accessible only by users with 'admin' role
 const publicRoutes = ['/unauthenticated', '/unauthorized', '/home'];
