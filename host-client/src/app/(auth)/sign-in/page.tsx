@@ -12,7 +12,7 @@ const SignIn = () => {
   const [modalMessage, setModalMessage] = useState('');
   const [isError, setIsError] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [countdown, setCountdown] = useState(2); // State for countdown timer
+  const [countdown, setCountdown] = useState(3); // State for countdown timer
 
   useEffect(() => {
     if (showModal && !isError) {
@@ -21,6 +21,8 @@ const SignIn = () => {
           if (prevCount <= 1) {
             clearInterval(timer);
             router.push('/home');
+            // refresh the route to make sure client doesn't cache and would send req with cookies to server. So that middleware could have cookies
+            router.refresh()
             return 0;
           }
           return prevCount - 1;
@@ -48,11 +50,7 @@ const SignIn = () => {
         const expiresDate = new Date();
         expiresDate.setDate(expiresDate.getDate() + expires);
 
-        // Check if running on HTTPS to set the secure attribute
-        const secure = window.location.protocol === 'https:' ? 'secure;' : '';
-
-        document.cookie = `authToken=${data.token}; expires=${expiresDate.toUTCString()}; path=/; ${secure} samesite=strict`;
-
+        document.cookie = `authToken=${data.token}; expires=${expiresDate.toUTCString()}; path=/; secure; samesite=strict`;
 
         setModalMessage(data.message ?? "Log in successfully!");
         setIsError(false);
