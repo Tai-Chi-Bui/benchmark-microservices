@@ -1,6 +1,6 @@
 'use client';
 
-import { useGetProducts } from '@/app/_api/auth/getProducts';
+import { useGetProducts } from '@/app/_api/product/getProducts';
 import React, { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import toast, { Toaster } from 'react-hot-toast';

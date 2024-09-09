@@ -55,7 +55,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <nav className="bg-gradient-to-r from-gray-700 to-gray-900 text-white p-4 shadow-lg">
         <ul className="flex justify-center space-x-8">
           <NavItem href="/home" icon={<HomeIcon className="h-5 w-5" />} label="Home" />
-          <NavItem href="/blogs" icon={<BookOpenIcon className="h-5 w-5" />} label="Blogs" />
           <NavItem href="/products" icon={<ListBulletIcon className="h-5 w-5" />} label="Products" />
           <NavItem href="/cart" icon={<ShoppingCartIcon className="h-5 w-5" />} label="Cart" />
           <NavItem href="/admin-dashboard" icon={<CubeIcon className="h-5 w-5" />} label="Dashboard" />
