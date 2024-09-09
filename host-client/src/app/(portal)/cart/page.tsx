@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
 import { TrashIcon, ShoppingBagIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import styles from './CartPage.module.css'; // Import the CSS module
 
 // Define CartItem type
 interface CartItem {
@@ -22,12 +23,24 @@ const CartPage = () => {
     setCartItems(savedCart ? JSON.parse(savedCart) : []);
   }, []);
 
-  // Remove item from cart
-  const removeFromCart = (id: string) => {
-    const updatedCart = cartItems.filter(item => item._id !== id);
+  // Update quantity of an item in the cart
+  const updateQuantity = (id: string, newQuantity: number) => {
+    const updatedCart = cartItems.map((item) =>
+      item._id === id ? { ...item, quantity: newQuantity } : item
+    );
     setCartItems(updatedCart);
     Cookies.set('cart', JSON.stringify(updatedCart)); // Update the cookie as well
   };
+
+  // Remove item from cart
+  const removeFromCart = (id: string) => {
+    const updatedCart = cartItems.filter((item) => item._id !== id);
+    setCartItems(updatedCart);
+    Cookies.set('cart', JSON.stringify(updatedCart)); // Update the cookie as well
+  };
+
+  // Calculate total amount
+  const totalAmount = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
   return (
     <div className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
@@ -57,7 +70,13 @@ const CartPage = () => {
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-2">
                       <span className="text-sm text-gray-500">Quantity: </span>
-                      <span className="bg-gray-100 px-3 py-1 rounded-lg text-gray-900">{item.quantity}</span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={item.quantity}
+                        onChange={(e) => updateQuantity(item._id, Number(e.target.value))}
+                        className={styles.quantityInput} // Apply the CSS module class
+                      />
                     </div>
                     <button
                       onClick={() => removeFromCart(item._id)}
@@ -71,6 +90,23 @@ const CartPage = () => {
               </li>
             ))}
           </ul>
+
+          {/* Total amount section */}
+          <div className="mt-6 border-t border-gray-200 pt-6 text-right">
+            <p className="text-xl font-semibold text-gray-900">
+              Total: ${totalAmount.toFixed(2)}
+            </p>
+          </div>
+
+          {/* Checkout button (disabled for now) */}
+          <div className="mt-6 text-right">
+            <button
+              className="bg-gray-300 text-white py-2 px-6 rounded-md shadow-md cursor-not-allowed"
+              disabled
+            >
+              Checkout (coming soon)
+            </button>
+          </div>
         </div>
       )}
 

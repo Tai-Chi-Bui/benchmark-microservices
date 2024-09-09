@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     output: 'standalone',
+    reactStrictMode: false,
     // This options allow hot reload on docker window destop for this app 
     webpack: config => {
         config.watchOptions = {
