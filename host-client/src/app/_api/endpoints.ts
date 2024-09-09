@@ -8,6 +8,7 @@ export const endpoints = {
     },
     product: {
       getProducts: `${apiBase}/products`,
+      getProductById: `${apiBase}/products`,
       createProduct: `${apiBase}/products`,
     }
   };
