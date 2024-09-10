@@ -52,7 +52,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </header>
 
       {/* Navbar */}
-      <nav className="bg-gradient-to-r from-gray-700 to-gray-900 text-white p-4 shadow-lg">
+      <nav className="bg-gradient-to-r from-gray-700 to-gray-900 text-white p-4 shadow-lg sticky top-0 z-10">
         <ul className="flex justify-center space-x-8">
           <NavItem href="/home" icon={<HomeIcon className="h-5 w-5" />} label="Home" />
           <NavItem href="/products" icon={<ListBulletIcon className="h-5 w-5" />} label="Products" />
