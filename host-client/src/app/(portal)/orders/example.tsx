@@ -1,9 +1,8 @@
-'use client';
+'use client'
 
-import { ChevronRightIcon, ChevronLeftIcon, FunnelIcon, CalendarIcon, CurrencyDollarIcon, CheckCircleIcon, CreditCardIcon, TruckIcon } from '@heroicons/react/24/outline';
-import React, { useState, useEffect } from 'react';
+import { ChevronRightIcon, ChevronLeftIcon, FunnelIcon, CalendarIcon, CurrencyDollarIcon, CheckCircleIcon, ChevronUpIcon, ChevronDownIcon, CreditCardIcon, TruckIcon } from '@heroicons/react/24/outline';
+import React, { useState } from 'react';
 
-// Interfaces for Product and Order
 interface Product {
     id: string;
     name: string;
@@ -20,18 +19,16 @@ interface Order {
     paymentDetails: {
         method: 'Cash' | 'Credit Card' | 'Bank Transfer';
         status: 'Pending' | 'Received';
-        reference: string;
+        reference: string; // Transaction number or identifier
     };
     deliveryDetails: {
-        destination: '45 Pine St, Apt 2A, Brookville, 54321',
         location: 'Warehouse' | 'In Transit' | `Customer's Door`;
         status: 'Pending' | 'Completed';
     };
     status: 'Pending' | 'Completed' | 'Cancelled' | 'Rejected by the Seller';
 }
 
-// Sample orders for fallback data
-const sampleOrders: Order[] = [
+const initialOrders: Order[] = [
     {
         id: '12345',
         createdDate: '2024-09-01',
@@ -47,7 +44,6 @@ const sampleOrders: Order[] = [
             reference: 'txn12345',
         },
         deliveryDetails: {
-            destination: '45 Pine St, Apt 2A, Brookville, 54321',
             location: 'Customer\'s Door',
             status: 'Completed',
         },
@@ -68,7 +64,6 @@ const sampleOrders: Order[] = [
             reference: 'txn67890',
         },
         deliveryDetails: {
-            destination: '45 Pine St, Apt 2A, Brookville, 54321',
             location: 'Warehouse',
             status: 'Pending',
         },
@@ -86,10 +81,9 @@ const sampleOrders: Order[] = [
         paymentDetails: {
             method: 'Cash',
             status: 'Pending',
-            reference: 'N/A',
+            reference: 'txn98765',
         },
         deliveryDetails: {
-            destination: '45 Pine St, Apt 2A, Brookville, 54321',
             location: 'In Transit',
             status: 'Pending',
         },
@@ -110,7 +104,6 @@ const sampleOrders: Order[] = [
             reference: 'txn54321',
         },
         deliveryDetails: {
-            destination: '45 Pine St, Apt 2A, Brookville, 54321',
             location: 'Warehouse',
             status: 'Pending',
         },
@@ -131,7 +124,6 @@ const sampleOrders: Order[] = [
             reference: 'txn11223',
         },
         deliveryDetails: {
-            destination: '45 Pine St, Apt 2A, Brookville, 54321',
             location: 'Customer\'s Door',
             status: 'Completed',
         },
@@ -152,7 +144,6 @@ const sampleOrders: Order[] = [
             reference: 'txn33445',
         },
         deliveryDetails: {
-            destination: '45 Pine St, Apt 2A, Brookville, 54321',
             location: 'In Transit',
             status: 'Completed',
         },
@@ -173,7 +164,6 @@ const sampleOrders: Order[] = [
             reference: 'txn99887',
         },
         deliveryDetails: {
-            destination: '45 Pine St, Apt 2A, Brookville, 54321',
             location: 'Warehouse',
             status: 'Pending',
         },
@@ -194,7 +184,6 @@ const sampleOrders: Order[] = [
             reference: 'txn66789',
         },
         deliveryDetails: {
-            destination: '45 Pine St, Apt 2A, Brookville, 54321',
             location: 'In Transit',
             status: 'Completed',
         },
@@ -215,7 +204,6 @@ const sampleOrders: Order[] = [
             reference: 'txn44556',
         },
         deliveryDetails: {
-            destination: '45 Pine St, Apt 2A, Brookville, 54321',
             location: 'Warehouse',
             status: 'Pending',
         },
@@ -236,7 +224,6 @@ const sampleOrders: Order[] = [
             reference: 'txn77889',
         },
         deliveryDetails: {
-            destination: '45 Pine St, Apt 2A, Brookville, 54321',
             location: 'Customer\'s Door',
             status: 'Completed',
         },
@@ -244,50 +231,16 @@ const sampleOrders: Order[] = [
     }
 ];
 
-// Data fetching function
-const fetchOrders = async (): Promise<Order[]> => {
-    try {
-        // Simulating API request, replace with actual API fetch logic later
-        const response = await fetch('/api/orders'); // Placeholder for API
-        if (response.ok) {
-            const data = await response.json();
-            return data; // Expected to be an array of orders
-        } else {
-            throw new Error('Failed to fetch orders');
-        }
-    } catch (error) {
-        console.error('Error fetching orders:', error);
-        return sampleOrders; // Return sample data as fallback
-    }
-};
-
 const ORDERS_PER_PAGE = 2;
 
 const OrdersPage: React.FC = () => {
-    const [orders, setOrders] = useState<Order[]>([]);
-    const [loading, setLoading] = useState<boolean>(true); // Loading state
-    const [error, setError] = useState<string | null>(null); // Error state
+    const [orders, setOrders] = useState<Order[]>(initialOrders);
     const [currentPage, setCurrentPage] = useState(1);
     const [statusFilter, setStatusFilter] = useState('');
     const [minAmount, setMinAmount] = useState('');
     const [maxAmount, setMaxAmount] = useState('');
     const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
-
-    // Use effect to fetch orders on component mount
-    useEffect(() => {
-        const loadOrders = async () => {
-            try {
-                const fetchedOrders = await fetchOrders();
-                setOrders(fetchedOrders);
-            } catch (err) {
-                setError('Failed to load orders');
-            } finally {
-                setLoading(false); // Loading done
-            }
-        };
-
-        loadOrders();
-    }, []);
+    const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null); // Track which order is expanded
 
     const totalPages = Math.ceil(orders.length / ORDERS_PER_PAGE);
     const paginatedOrders = orders.slice((currentPage - 1) * ORDERS_PER_PAGE, currentPage * ORDERS_PER_PAGE);
@@ -301,9 +254,8 @@ const OrdersPage: React.FC = () => {
             )
         );
     };
-
     const handleFilter = () => {
-        let filteredOrders = sampleOrders;
+        let filteredOrders = initialOrders;
 
         // Filter by status
         if (statusFilter) {
@@ -332,14 +284,6 @@ const OrdersPage: React.FC = () => {
         setOrders(filteredOrders);
         setCurrentPage(1); // Reset to page 1 after filtering
     };
-
-    if (loading) {
-        return <div className="text-center text-gray-500">Loading orders...</div>;
-    }
-
-    if (error) {
-        return <div className="text-center text-red-500">{error}</div>;
-    }
 
     return (
         <div className="min-h-screen bg-gray-100 p-8">
@@ -476,10 +420,10 @@ const OrdersPage: React.FC = () => {
                                         Method: <span className="font-medium text-gray-800">{order.paymentDetails.method}</span>
                                     </p>
                                     <p className="text-gray-600">
-                                        Reference: <span className="font-medium text-gray-800">{order.paymentDetails.reference}</span>
+                                        Status: <span className="font-medium text-gray-800">{order.paymentDetails.status}</span>
                                     </p>
                                     <p className="text-gray-600">
-                                        Status: <span className="font-medium text-gray-800">{order.paymentDetails.status}</span>
+                                        Reference: <span className="font-medium text-gray-800">{order.paymentDetails.reference}</span>
                                     </p>
                                 </div>
 
@@ -488,9 +432,6 @@ const OrdersPage: React.FC = () => {
                                         <TruckIcon className="h-6 w-6 text-gray-600 mr-2" />
                                         <h3 className="text-lg font-semibold text-gray-700">Delivery Details</h3>
                                     </div>
-                                    <p className="text-gray-600">
-                                        Destination: <span className="font-medium text-gray-800">{order.deliveryDetails.destination}</span>
-                                    </p>
                                     <p className="text-gray-600">
                                         Location: <span className="font-medium text-gray-800">{order.deliveryDetails.location}</span>
                                     </p>
