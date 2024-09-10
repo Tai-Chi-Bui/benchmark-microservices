@@ -103,7 +103,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose }) => {
                                 onChange={() => setPaymentMethod('cash')}
                                 className="mr-2"
                             />
-                            <label htmlFor="cash" className="text-gray-400 flex items-center space-x-2">
+                            <label htmlFor="cash" className="text-gray-600 flex items-center space-x-2">
                                 <CurrencyDollarIcon className="h-5 w-5" />
                                 <span>Cash</span>
                             </label>
@@ -117,7 +117,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose }) => {
                                 disabled
                                 className="mr-2"
                             />
-                            <label htmlFor="credit-card" className="text-gray-400 flex items-center space-x-2">
+                            <label htmlFor="credit-card" className="text-gray-300 flex items-center space-x-2">
                                 <CreditCardIcon className="h-5 w-5" />
                                 <span>Credit Card (Incoming feature)</span>
                             </label>
@@ -131,7 +131,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose }) => {
                                 disabled
                                 className="mr-2"
                             />
-                            <label htmlFor="bank-transfer" className="text-gray-400 flex items-center space-x-2">
+                            <label htmlFor="bank-transfer" className="text-gray-300 flex items-center space-x-2">
                                 <BanknotesIcon className="h-5 w-5" />
                                 <span>Bank Transfer (Incoming feature)</span>
                             </label>
