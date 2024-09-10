@@ -11,7 +11,9 @@ interface Product {
   name: string;
   price: number;
   description?: string; // Optional field
+  quantity?: number; // Ensure this is included if it's part of the API response
 }
+
 
 // Define CartItem type based on the product with an added quantity
 interface CartItem extends Product {
@@ -75,25 +77,39 @@ const ProductList = () => {
           {products.map((product) => (
             <div
               key={product._id}
-              className="border rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col justify-between"
+              className="border rounded-lg p-6 shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col justify-between bg-white transform hover:scale-105 transition-transform ease-in-out"
             >
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+              <h3 className="text-2xl font-bold text-gray-900 mb-3 hover:text-blue-500 transition-colors duration-200">
                 {product.name}
               </h3>
-              <p className="text-lg text-gray-600 mb-4">
+              <p className="text-lg font-medium text-gray-700 mb-4">
                 ${product.price.toFixed(2)}
               </p>
               {product.description && (
-                <p className="text-gray-500 mb-6">{product.description}</p>
+                <p className="text-sm text-gray-500 italic mb-6">{product.description}</p>
+              )}
+              {product.quantity !== undefined && (
+                <p className="text-md font-medium mb-4">
+                  {product.quantity > 0 ? (
+                    <span className="text-green-600">In Stock: {product.quantity}</span>
+                  ) : (
+                    <span className="text-red-600 font-semibold">Out of Stock</span>
+                  )}
+                </p>
               )}
               <button
-                className={`mt-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors duration-300 ${isAdding === product._id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`mt-auto text-white py-2 px-5 rounded-full transition-all duration-300 transform ${isAdding === product._id || product.quantity === 0
+                    ? 'bg-gray-400 cursor-not-allowed opacity-70'
+                    : 'bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 hover:scale-105'
+                  }`}
                 onClick={() => addToCart(product)}
-                disabled={isAdding === product._id}
+                disabled={isAdding === product._id || product.quantity === 0}
               >
                 {isAdding === product._id ? 'Adding...' : 'Add to cart'}
               </button>
+
             </div>
+
           ))}
         </div>
       )}

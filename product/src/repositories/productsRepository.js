@@ -47,6 +47,17 @@ class ProductsRepository {
     }
   }
 
+  async findProductsByQuantityRange(minQuantity, maxQuantity) {
+    try {
+      const products = await Product.findByQuantityRange(minQuantity, maxQuantity); // Use static method for quantity range
+      return products;
+    } catch (error) {
+      console.error('Error finding products by quantity range:', error);
+      throw new Error('Failed to retrieve products by quantity range');
+    }
+  }
+  
+
   async applyDiscountToProduct(productId, discount) {
     try {
       const product = await Product.findById(productId);

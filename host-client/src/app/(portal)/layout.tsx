@@ -2,12 +2,12 @@ import React, { ReactNode, useMemo } from 'react';
 import Link from 'next/link';
 import {
   HomeIcon,
-  BookOpenIcon,
   ArrowDownOnSquareIcon,
   ArrowUpOnSquareIcon,
   CubeIcon,
   ListBulletIcon,
-  ShoppingCartIcon
+  ShoppingCartIcon,
+  UserIcon
 } from '@heroicons/react/24/outline';
 import { cookies } from 'next/headers';
 import { isValidToken } from '../_utils/auth';
@@ -52,12 +52,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </header>
 
       {/* Navbar */}
-      <nav className="bg-gradient-to-r from-gray-700 to-gray-900 text-white p-4 shadow-lg">
+      <nav className="bg-gradient-to-r from-gray-700 to-gray-900 text-white p-4 shadow-lg sticky top-0 z-10">
         <ul className="flex justify-center space-x-8">
           <NavItem href="/home" icon={<HomeIcon className="h-5 w-5" />} label="Home" />
           <NavItem href="/products" icon={<ListBulletIcon className="h-5 w-5" />} label="Products" />
           <NavItem href="/cart" icon={<ShoppingCartIcon className="h-5 w-5" />} label="Cart" />
           <NavItem href="/admin-dashboard" icon={<CubeIcon className="h-5 w-5" />} label="Dashboard" />
+          <NavItem href="/profile" icon={<UserIcon className="h-5 w-5" />} label="Profile" />
           <li className="flex items-center space-x-2">
             {isAuthenticated ? (
               <>

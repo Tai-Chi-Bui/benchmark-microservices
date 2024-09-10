@@ -5,6 +5,7 @@ export const endpoints = {
     auth: {
       signUp: `${apiBase}/auth/register`,
       login: `${apiBase}/auth/login`,
+      getProfile: `${apiBase}/auth/profile`,
     },
     product: {
       getProducts: `${apiBase}/products`,

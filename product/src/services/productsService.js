@@ -50,6 +50,18 @@ class ProductsService {
     }
   }
 
+  // New service method to find products by quantity range
+  async getProductsByQuantityRange(minQuantity, maxQuantity) {
+    try {
+      const products = await this.productsRepository.findProductsByQuantityRange(minQuantity, maxQuantity);
+      return products;
+    } catch (error) {
+      console.error('Error fetching products by quantity range:', error.message);
+      throw new Error('Failed to retrieve products by quantity range');
+    }
+  }
+
+
   // New service method to apply a discount to a product
   async applyDiscountToProduct(productId, discount) {
     try {
