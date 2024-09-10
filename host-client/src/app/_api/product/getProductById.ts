@@ -9,6 +9,7 @@ const productSchema = z.object({
   name: z.string().min(2, 'Product name must be at least 2 characters long'),
   price: z.number().positive('Price must be a positive number'),
   description: z.string().optional(),
+  quantity: z.number().nonnegative().optional(),
   __v: z.number().optional(), // Accepts the '__v' field but it's optional
 });
 

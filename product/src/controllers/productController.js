@@ -13,6 +13,7 @@ class ProductController {
     this.createProduct = this.createProduct.bind(this);
     this.getProductById = this.getProductById.bind(this);
     this.getProductsByPriceRange = this.getProductsByPriceRange.bind(this);
+    this.getProductsByQuantityRange = this.getProductsByQuantityRange.bind(this);
     this.applyDiscountToProduct = this.applyDiscountToProduct.bind(this);
     this.createOrder = this.createOrder.bind(this);
     this.getOrderStatus = this.getOrderStatus.bind(this);
@@ -145,6 +146,34 @@ class ProductController {
       res.status(500).json({ message: "Server error" });
     }
   }
+
+// New method: Get products by quantity range
+async getProductsByQuantityRange(req, res, next) {
+  try {
+    const token = req.headers.authorization;
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // Extract minQuantity and maxQuantity from the query parameters
+    const { minQuantity, maxQuantity } = req.query;
+
+    // Validate and parse the query parameters
+    if (isNaN(minQuantity) || isNaN(maxQuantity)) {
+      return res.status(400).json({ message: "Invalid quantity range provided" });
+    }
+
+    // Fetch products by quantity range using the service method
+    const products = await this.productsService.getProductsByQuantityRange(Number(minQuantity), Number(maxQuantity));
+
+    // Return the products in the response
+    res.status(200).json(products);
+  } catch (error) {
+    console.error('Error fetching products by quantity range:', error);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 
   // New method: Apply discount to a product
   async applyDiscountToProduct(req, res, next) {

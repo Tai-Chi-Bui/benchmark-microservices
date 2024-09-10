@@ -32,11 +32,17 @@ const CartPage = () => {
 
   // Update quantity of an item in the cart
   const updateQuantity = (id: string, newQuantity: number) => {
-    const updatedCart = cartItems.map((item) =>
-      item._id === id ? { ...item, quantity: newQuantity } : item
-    );
-    setCartItems(updatedCart);
-    Cookies.set('cart', JSON.stringify(updatedCart)); // Update the cookie as well
+    if (newQuantity <= 0) {
+      // Remove the item if quantity is 0 or less
+      removeFromCart(id);
+    } else {
+      // Update the quantity if it's positive
+      const updatedCart = cartItems.map((item) =>
+        item._id === id ? { ...item, quantity: newQuantity } : item
+      );
+      setCartItems(updatedCart);
+      Cookies.set('cart', JSON.stringify(updatedCart)); // Update the cookie as well
+    }
   };
 
   // Remove item from cart
