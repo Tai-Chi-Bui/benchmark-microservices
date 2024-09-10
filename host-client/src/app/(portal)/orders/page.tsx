@@ -23,8 +23,10 @@ interface Order {
         reference: string;
     };
     deliveryDetails: {
+        recipientName: 'James Whitman',
+        recipientPhone: '0995655199',
         destination: '45 Pine St, Apt 2A, Brookville, 54321',
-        location: 'Warehouse' | 'In Transit' | `Customer's Door`;
+        tracking: 'Warehouse' | 'In Transit' | `Customer's Door`;
         status: 'Pending' | 'Completed';
     };
     status: 'Pending' | 'Completed' | 'Cancelled' | 'Rejected by the Seller';
@@ -47,8 +49,11 @@ const sampleOrders: Order[] = [
             reference: 'txn12345',
         },
         deliveryDetails: {
+            recipientName: 'James Whitman',
+            recipientPhone: '0995655199',
+
             destination: '45 Pine St, Apt 2A, Brookville, 54321',
-            location: 'Customer\'s Door',
+            tracking: 'Customer\'s Door',
             status: 'Completed',
         },
         status: 'Completed',
@@ -68,8 +73,10 @@ const sampleOrders: Order[] = [
             reference: 'txn67890',
         },
         deliveryDetails: {
+            recipientName: 'James Whitman',
+            recipientPhone: '0995655199',
             destination: '45 Pine St, Apt 2A, Brookville, 54321',
-            location: 'Warehouse',
+            tracking: 'Warehouse',
             status: 'Pending',
         },
         status: 'Pending',
@@ -89,8 +96,10 @@ const sampleOrders: Order[] = [
             reference: 'N/A',
         },
         deliveryDetails: {
+            recipientName: 'James Whitman',
+            recipientPhone: '0995655199',
             destination: '45 Pine St, Apt 2A, Brookville, 54321',
-            location: 'In Transit',
+            tracking: 'In Transit',
             status: 'Pending',
         },
         status: 'Cancelled',
@@ -110,8 +119,10 @@ const sampleOrders: Order[] = [
             reference: 'txn54321',
         },
         deliveryDetails: {
+            recipientName: 'James Whitman',
+            recipientPhone: '0995655199',
             destination: '45 Pine St, Apt 2A, Brookville, 54321',
-            location: 'Warehouse',
+            tracking: 'Warehouse',
             status: 'Pending',
         },
         status: 'Rejected by the Seller',
@@ -131,8 +142,10 @@ const sampleOrders: Order[] = [
             reference: 'txn11223',
         },
         deliveryDetails: {
+            recipientName: 'James Whitman',
+            recipientPhone: '0995655199',
             destination: '45 Pine St, Apt 2A, Brookville, 54321',
-            location: 'Customer\'s Door',
+            tracking: 'Customer\'s Door',
             status: 'Completed',
         },
         status: 'Completed',
@@ -152,8 +165,10 @@ const sampleOrders: Order[] = [
             reference: 'txn33445',
         },
         deliveryDetails: {
+            recipientName: 'James Whitman',
+            recipientPhone: '0995655199',
             destination: '45 Pine St, Apt 2A, Brookville, 54321',
-            location: 'In Transit',
+            tracking: 'In Transit',
             status: 'Completed',
         },
         status: 'Completed',
@@ -173,8 +188,10 @@ const sampleOrders: Order[] = [
             reference: 'txn99887',
         },
         deliveryDetails: {
+            recipientName: 'James Whitman',
+            recipientPhone: '0995655199',
             destination: '45 Pine St, Apt 2A, Brookville, 54321',
-            location: 'Warehouse',
+            tracking: 'Warehouse',
             status: 'Pending',
         },
         status: 'Pending',
@@ -194,8 +211,10 @@ const sampleOrders: Order[] = [
             reference: 'txn66789',
         },
         deliveryDetails: {
+            recipientName: 'James Whitman',
+            recipientPhone: '0995655199',
             destination: '45 Pine St, Apt 2A, Brookville, 54321',
-            location: 'In Transit',
+            tracking: 'In Transit',
             status: 'Completed',
         },
         status: 'Completed',
@@ -215,8 +234,10 @@ const sampleOrders: Order[] = [
             reference: 'txn44556',
         },
         deliveryDetails: {
+            recipientName: 'James Whitman',
+            recipientPhone: '0995655199',
             destination: '45 Pine St, Apt 2A, Brookville, 54321',
-            location: 'Warehouse',
+            tracking: 'Warehouse',
             status: 'Pending',
         },
         status: 'Pending',
@@ -236,8 +257,10 @@ const sampleOrders: Order[] = [
             reference: 'txn77889',
         },
         deliveryDetails: {
+            recipientName: 'James Whitman',
+            recipientPhone: '0995655199',
             destination: '45 Pine St, Apt 2A, Brookville, 54321',
-            location: 'Customer\'s Door',
+            tracking: 'Customer\'s Door',
             status: 'Completed',
         },
         status: 'Completed',
@@ -492,7 +515,10 @@ const OrdersPage: React.FC = () => {
                                         Destination: <span className="font-medium text-gray-800">{order.deliveryDetails.destination}</span>
                                     </p>
                                     <p className="text-gray-600">
-                                        Location: <span className="font-medium text-gray-800">{order.deliveryDetails.location}</span>
+                                        Recipient: <span className="font-medium text-gray-800">{order.deliveryDetails.recipientName} - {order.deliveryDetails.recipientPhone}</span>
+                                    </p>
+                                    <p className="text-gray-600">
+                                        Tracking: <span className="font-medium text-gray-800">{order.deliveryDetails.tracking}</span>
                                     </p>
                                     <p className="text-gray-600">
                                         Status: <span className="font-medium text-gray-800">{order.deliveryDetails.status}</span>
