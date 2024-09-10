@@ -7,7 +7,8 @@ import {
   CubeIcon,
   ListBulletIcon,
   ShoppingCartIcon,
-  UserIcon
+  UserIcon,
+  ClipboardDocumentIcon
 } from '@heroicons/react/24/outline';
 import { cookies } from 'next/headers';
 import { isValidToken } from '../_utils/auth';
@@ -57,6 +58,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <NavItem href="/home" icon={<HomeIcon className="h-5 w-5" />} label="Home" />
           <NavItem href="/products" icon={<ListBulletIcon className="h-5 w-5" />} label="Products" />
           <NavItem href="/cart" icon={<ShoppingCartIcon className="h-5 w-5" />} label="Cart" />
+          <NavItem href="/orders" icon={<ClipboardDocumentIcon className="h-5 w-5" />} label="Orders" />
           <NavItem href="/admin-dashboard" icon={<CubeIcon className="h-5 w-5" />} label="Dashboard" />
           <NavItem href="/profile" icon={<UserIcon className="h-5 w-5" />} label="Profile" />
           <li className="flex items-center space-x-2">

@@ -9,7 +9,7 @@ import toast, { Toaster } from 'react-hot-toast';
 interface Product {
   _id: string;
   name: string;
-  price: number;
+  price?: number;
   description?: string; // Optional field
   quantity?: number; // Ensure this is included if it's part of the API response
 }
@@ -102,7 +102,7 @@ const ProductList = () => {
                     ? 'bg-gray-400 cursor-not-allowed opacity-70'
                     : 'bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 hover:scale-105'
                   }`}
-                onClick={() => addToCart(product)}
+                onClick={() => addToCart({_id: product._id, name: product.name})}
                 disabled={isAdding === product._id || product.quantity === 0}
               >
                 {isAdding === product._id ? 'Adding...' : 'Add to cart'}
