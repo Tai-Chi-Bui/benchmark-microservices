@@ -108,7 +108,7 @@ class OrderController {
 
         console.log("Publishing message to RabbitMQ:", orderProducts);
 
-        await messageBroker.publishMessage('products', {
+        await messageBroker.publishMessage('orders', {
           event: 'ORDER_COMPLETED',
           orderId: updatedOrder._id,
           products: orderProducts,

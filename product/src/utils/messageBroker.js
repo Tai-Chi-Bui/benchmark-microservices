@@ -9,7 +9,7 @@ class MessageBroker {
     this.retries = 0; // Count of retries attempted
   }
 
-  async connect(queueName = "products") {
+  async connect(queueName = "orders") {
     console.log("Connecting to RabbitMQ...");
 
     const connectToRabbitMQ = async () => {
