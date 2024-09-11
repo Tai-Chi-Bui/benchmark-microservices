@@ -1,6 +1,5 @@
 const ProductsService = require("../services/productsService.js");
 const messageBroker = require("../utils/messageBroker");
-const uuid = require('uuid');
 
 /**
  * Class to hold the API implementation for the product services
@@ -15,10 +14,13 @@ class ProductController {
     this.getProductsByPriceRange = this.getProductsByPriceRange.bind(this);
     this.getProductsByQuantityRange = this.getProductsByQuantityRange.bind(this);
     this.applyDiscountToProduct = this.applyDiscountToProduct.bind(this);
-    this.createOrder = this.createOrder.bind(this);
-    this.getOrderStatus = this.getOrderStatus.bind(this);
     this.getProducts = this.getProducts.bind(this);
-    this.ordersMap = new Map();
+
+    // Bind the method for message consumption
+    this.consumeOrderCompletedMessage = this.consumeOrderCompletedMessage.bind(this);
+
+    // Start consuming messages from RabbitMQ
+    this.consumeOrderCompletedMessage();
   }
 
   async createProduct(req, res, next) {
@@ -34,64 +36,6 @@ class ProductController {
       console.error(error);
       res.status(500).json({ message: "Server error" });
     }
-  }
-
-  async createOrder(req, res, next) {
-    try {
-      const token = req.headers.authorization;
-      if (!token) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const { ids } = req.body;
-      const products = await this.productsService.getProductsByIds(ids); // Fetch products via service
-
-      const orderId = uuid.v4(); // Generate a unique order ID
-      this.ordersMap.set(orderId, { 
-        status: "pending", 
-        products, 
-        username: req.user.username 
-      });
-
-      await messageBroker.publishMessage("orders", {
-        products,
-        username: req.user.username,
-        orderId,
-      });
-
-      messageBroker.consumeMessage("products", (data) => {
-        const orderData = JSON.parse(JSON.stringify(data));
-        const { orderId } = orderData;
-        const order = this.ordersMap.get(orderId);
-        if (order) {
-          // update the order in the map
-          this.ordersMap.set(orderId, { ...order, ...orderData, status: 'completed' });
-          console.log("Updated order:", order);
-        }
-      });
-
-      // Long polling until order is completed
-      let order = this.ordersMap.get(orderId);
-      while (order.status !== 'completed') {
-        await new Promise(resolve => setTimeout(resolve, 1000)); // wait for 1 second before checking status again
-        order = this.ordersMap.get(orderId);
-      }
-
-      // Once the order is marked as completed, return the complete order details
-      return res.status(201).json(order);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Server error" });
-    }
-  }
-
-  async getOrderStatus(req, res, next) {
-    const { orderId } = req.params;
-    const order = this.ordersMap.get(orderId);
-    if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
-    }
-    return res.status(200).json(order);
   }
 
   async getProducts(req, res, next) {
@@ -129,7 +73,7 @@ class ProductController {
     }
   }
 
-  // New method: Get products by price range
+  // Get products by price range
   async getProductsByPriceRange(req, res, next) {
     try {
       const token = req.headers.authorization;
@@ -147,35 +91,29 @@ class ProductController {
     }
   }
 
-// New method: Get products by quantity range
-async getProductsByQuantityRange(req, res, next) {
-  try {
-    const token = req.headers.authorization;
-    if (!token) {
-      return res.status(401).json({ message: "Unauthorized" });
+  // Get products by quantity range
+  async getProductsByQuantityRange(req, res, next) {
+    try {
+      const token = req.headers.authorization;
+      if (!token) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { minQuantity, maxQuantity } = req.query;
+
+      if (isNaN(minQuantity) || isNaN(maxQuantity)) {
+        return res.status(400).json({ message: "Invalid quantity range provided" });
+      }
+
+      const products = await this.productsService.getProductsByQuantityRange(Number(minQuantity), Number(maxQuantity));
+      res.status(200).json(products);
+    } catch (error) {
+      console.error('Error fetching products by quantity range:', error);
+      res.status(500).json({ message: "Server error" });
     }
-
-    // Extract minQuantity and maxQuantity from the query parameters
-    const { minQuantity, maxQuantity } = req.query;
-
-    // Validate and parse the query parameters
-    if (isNaN(minQuantity) || isNaN(maxQuantity)) {
-      return res.status(400).json({ message: "Invalid quantity range provided" });
-    }
-
-    // Fetch products by quantity range using the service method
-    const products = await this.productsService.getProductsByQuantityRange(Number(minQuantity), Number(maxQuantity));
-
-    // Return the products in the response
-    res.status(200).json(products);
-  } catch (error) {
-    console.error('Error fetching products by quantity range:', error);
-    res.status(500).json({ message: "Server error" });
   }
-}
 
-
-  // New method: Apply discount to a product
+  // Apply discount to a product
   async applyDiscountToProduct(req, res, next) {
     try {
       const token = req.headers.authorization;
@@ -190,6 +128,26 @@ async getProductsByQuantityRange(req, res, next) {
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Server error" });
+    }
+  }
+
+  // Consume RabbitMQ messages for reducing product quantities
+  async consumeOrderCompletedMessage() {
+    try {
+      // Consume messages from RabbitMQ when an order is completed
+      await messageBroker.consumeMessage('orders', async (message) => {
+        if (message.event === 'ORDER_COMPLETED') {
+          console.log('Order completed message received:', message);
+
+          // Extract the product data from the message
+          const { products } = message;
+
+          // Call the service to reduce the product quantities
+          await this.productsService.reduceProductQuantities(products);
+        }
+      });
+    } catch (error) {
+      console.error('Error consuming order completed message:', error.message);
     }
   }
 }
