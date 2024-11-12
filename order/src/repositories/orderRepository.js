@@ -29,9 +29,9 @@ class OrdersRepository {
     }
   }
 
-  async findAll() {
+  async findAll(query) {
     try {
-      const orders = await Order.find()
+      const orders = await Order.find(query)
         .populate('products.productId', 'name') // Populate product names from the Product collection
         .lean(); // Use lean for performance
       // console.log("orders: ", orders);

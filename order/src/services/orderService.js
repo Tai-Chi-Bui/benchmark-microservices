@@ -29,9 +29,20 @@ class OrdersService {
     }
   }
 
-  async getOrders() {
+  async getOrders(status, minAmount, maxAmount, startDate, endDate) {
     try {
-      const orders = await this.ordersRepository.findAll();
+      // Build query based on provided filters
+      const query = {};
+      if (status) query.status = status;
+      if (minAmount && maxAmount) query.totalAmount = { $gte: minAmount, $lte: maxAmount };
+      if (startDate && endDate) {
+        query.createdDate = {
+          $gte: new Date(startDate),
+          $lte: new Date(endDate),
+        };
+      }
+
+      const orders = await this.ordersRepository.findAll(query);
       return orders;
     } catch (error) {
       console.error('Error fetching all orders:', error.message);

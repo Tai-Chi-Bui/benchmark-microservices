@@ -61,14 +61,17 @@ class OrderController {
       if (!token) {
         return res.status(401).json({ message: "Unauthorized" });
       }
+      const { status, minAmount, maxAmount, startDate, endDate } = req.query;
 
-      const orders = await this.ordersService.getOrders();
+
+      const orders = await this.ordersService.getOrders( status, minAmount, maxAmount, startDate, endDate);
       res.status(200).json(orders);
     } catch (error) {
       console.error('Error fetching all orders:', error.message);
       res.status(500).json({ message: "Server error" });
     }
   }
+
 
   // Method to get orders by status
   async getOrdersByStatus(req, res, next) {
