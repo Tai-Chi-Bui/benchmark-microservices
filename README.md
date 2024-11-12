@@ -34,6 +34,12 @@ To start all services in detached mode and build images:
 docker-compose up -d --build
 ```
 
+To rebuild only 1 service
+
+```bash
+docker-compose up --build <service_name>
+```
+
 To stop all services:
 
 ```bash

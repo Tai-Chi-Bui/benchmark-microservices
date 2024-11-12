@@ -34,6 +34,7 @@ class OrdersRepository {
       const orders = await Order.find()
         .populate('products.productId', 'name') // Populate product names from the Product collection
         .lean(); // Use lean for performance
+      // console.log("orders: ", orders);
       return orders;
     } catch (error) {
       console.error('Error finding all orders:', error);
