@@ -1,367 +1,43 @@
 'use client';
 
+import { useGetOrders } from '@/app/_api/order/getOrders';
+import { formatDateIfValid } from '@/app/_utils/date';
 import { ChevronRightIcon, ChevronLeftIcon, FunnelIcon, CalendarIcon, CurrencyDollarIcon, CheckCircleIcon, CreditCardIcon, TruckIcon } from '@heroicons/react/24/outline';
-import React, { useState, useEffect } from 'react';
-
-// Interfaces for Product and Order
-interface Product {
-    id: string;
-    name: string;
-    quantity: number;
-    price: number;
-}
-
-interface Order {
-    id: string;
-    createdDate: string;
-    updatedDate: string;
-    products: Product[];
-    totalAmount: number;
-    paymentDetails: {
-        method: 'Cash' | 'Credit Card' | 'Bank Transfer';
-        status: 'Pending' | 'Received';
-        reference: string;
-    };
-    deliveryDetails: {
-        recipientName: 'James Whitman',
-        recipientPhone: '0995655199',
-        destination: '45 Pine St, Apt 2A, Brookville, 54321',
-        tracking: 'Warehouse' | 'In Transit' | `Customer's Door`;
-        status: 'Pending' | 'Completed';
-    };
-    status: 'Pending' | 'Completed' | 'Cancelled' | 'Rejected by the Seller';
-}
-
-// Sample orders for fallback data
-const sampleOrders: Order[] = [
-    {
-        id: '12345',
-        createdDate: '2024-09-01',
-        updatedDate: '2024-09-02',
-        products: [
-            { id: 'p1', name: 'Product A', quantity: 2, price: 50 },
-            { id: 'p2', name: 'Product B', quantity: 1, price: 50 },
-        ],
-        totalAmount: 150,
-        paymentDetails: {
-            method: 'Credit Card',
-            status: 'Received',
-            reference: 'txn12345',
-        },
-        deliveryDetails: {
-            recipientName: 'James Whitman',
-            recipientPhone: '0995655199',
-
-            destination: '45 Pine St, Apt 2A, Brookville, 54321',
-            tracking: 'Customer\'s Door',
-            status: 'Completed',
-        },
-        status: 'Completed',
-    },
-    {
-        id: '67890',
-        createdDate: '2024-08-25',
-        updatedDate: '2024-08-26',
-        products: [
-            { id: 'p3', name: 'Product C', quantity: 3, price: 75 },
-            { id: 'p4', name: 'Product D', quantity: 1, price: 25 },
-        ],
-        totalAmount: 250,
-        paymentDetails: {
-            method: 'Bank Transfer',
-            status: 'Pending',
-            reference: 'txn67890',
-        },
-        deliveryDetails: {
-            recipientName: 'James Whitman',
-            recipientPhone: '0995655199',
-            destination: '45 Pine St, Apt 2A, Brookville, 54321',
-            tracking: 'Warehouse',
-            status: 'Pending',
-        },
-        status: 'Pending',
-    },
-    {
-        id: '98765',
-        createdDate: '2024-08-15',
-        updatedDate: '2024-08-16',
-        products: [
-            { id: 'p5', name: 'Product E', quantity: 1, price: 100 },
-            { id: 'p6', name: 'Product F', quantity: 2, price: 37.5 },
-        ],
-        totalAmount: 175,
-        paymentDetails: {
-            method: 'Cash',
-            status: 'Pending',
-            reference: 'N/A',
-        },
-        deliveryDetails: {
-            recipientName: 'James Whitman',
-            recipientPhone: '0995655199',
-            destination: '45 Pine St, Apt 2A, Brookville, 54321',
-            tracking: 'In Transit',
-            status: 'Pending',
-        },
-        status: 'Cancelled',
-    },
-    {
-        id: '54321',
-        createdDate: '2024-08-05',
-        updatedDate: '2024-08-06',
-        products: [
-            { id: 'p7', name: 'Product G', quantity: 1, price: 60 },
-            { id: 'p8', name: 'Product H', quantity: 1, price: 40 },
-        ],
-        totalAmount: 100,
-        paymentDetails: {
-            method: 'Credit Card',
-            status: 'Pending',
-            reference: 'txn54321',
-        },
-        deliveryDetails: {
-            recipientName: 'James Whitman',
-            recipientPhone: '0995655199',
-            destination: '45 Pine St, Apt 2A, Brookville, 54321',
-            tracking: 'Warehouse',
-            status: 'Pending',
-        },
-        status: 'Rejected by the Seller',
-    },
-    {
-        id: '11223',
-        createdDate: '2024-09-03',
-        updatedDate: '2024-09-04',
-        products: [
-            { id: 'p9', name: 'Product I', quantity: 1, price: 200 },
-            { id: 'p10', name: 'Product J', quantity: 3, price: 30 },
-        ],
-        totalAmount: 290,
-        paymentDetails: {
-            method: 'Credit Card',
-            status: 'Received',
-            reference: 'txn11223',
-        },
-        deliveryDetails: {
-            recipientName: 'James Whitman',
-            recipientPhone: '0995655199',
-            destination: '45 Pine St, Apt 2A, Brookville, 54321',
-            tracking: 'Customer\'s Door',
-            status: 'Completed',
-        },
-        status: 'Completed',
-    },
-    {
-        id: '33445',
-        createdDate: '2024-08-18',
-        updatedDate: '2024-08-19',
-        products: [
-            { id: 'p11', name: 'Product K', quantity: 2, price: 45 },
-            { id: 'p12', name: 'Product L', quantity: 1, price: 120 },
-        ],
-        totalAmount: 210,
-        paymentDetails: {
-            method: 'Bank Transfer',
-            status: 'Received',
-            reference: 'txn33445',
-        },
-        deliveryDetails: {
-            recipientName: 'James Whitman',
-            recipientPhone: '0995655199',
-            destination: '45 Pine St, Apt 2A, Brookville, 54321',
-            tracking: 'In Transit',
-            status: 'Completed',
-        },
-        status: 'Completed',
-    },
-    {
-        id: '99887',
-        createdDate: '2024-07-22',
-        updatedDate: '2024-07-23',
-        products: [
-            { id: 'p13', name: 'Product M', quantity: 1, price: 60 },
-            { id: 'p14', name: 'Product N', quantity: 4, price: 30 },
-        ],
-        totalAmount: 180,
-        paymentDetails: {
-            method: 'Cash',
-            status: 'Pending',
-            reference: 'txn99887',
-        },
-        deliveryDetails: {
-            recipientName: 'James Whitman',
-            recipientPhone: '0995655199',
-            destination: '45 Pine St, Apt 2A, Brookville, 54321',
-            tracking: 'Warehouse',
-            status: 'Pending',
-        },
-        status: 'Pending',
-    },
-    {
-        id: '66789',
-        createdDate: '2024-08-02',
-        updatedDate: '2024-08-03',
-        products: [
-            { id: 'p15', name: 'Product O', quantity: 3, price: 55 },
-            { id: 'p16', name: 'Product P', quantity: 1, price: 25 },
-        ],
-        totalAmount: 190,
-        paymentDetails: {
-            method: 'Credit Card',
-            status: 'Received',
-            reference: 'txn66789',
-        },
-        deliveryDetails: {
-            recipientName: 'James Whitman',
-            recipientPhone: '0995655199',
-            destination: '45 Pine St, Apt 2A, Brookville, 54321',
-            tracking: 'In Transit',
-            status: 'Completed',
-        },
-        status: 'Completed',
-    },
-    {
-        id: '44556',
-        createdDate: '2024-07-30',
-        updatedDate: '2024-07-31',
-        products: [
-            { id: 'p17', name: 'Product Q', quantity: 2, price: 80 },
-            { id: 'p18', name: 'Product R', quantity: 1, price: 35 },
-        ],
-        totalAmount: 195,
-        paymentDetails: {
-            method: 'Bank Transfer',
-            status: 'Pending',
-            reference: 'txn44556',
-        },
-        deliveryDetails: {
-            recipientName: 'James Whitman',
-            recipientPhone: '0995655199',
-            destination: '45 Pine St, Apt 2A, Brookville, 54321',
-            tracking: 'Warehouse',
-            status: 'Pending',
-        },
-        status: 'Pending',
-    },
-    {
-        id: '77889',
-        createdDate: '2024-09-07',
-        updatedDate: '2024-09-08',
-        products: [
-            { id: 'p19', name: 'Product S', quantity: 5, price: 40 },
-            { id: 'p20', name: 'Product T', quantity: 1, price: 20 },
-        ],
-        totalAmount: 220,
-        paymentDetails: {
-            method: 'Cash',
-            status: 'Received',
-            reference: 'txn77889',
-        },
-        deliveryDetails: {
-            recipientName: 'James Whitman',
-            recipientPhone: '0995655199',
-            destination: '45 Pine St, Apt 2A, Brookville, 54321',
-            tracking: 'Customer\'s Door',
-            status: 'Completed',
-        },
-        status: 'Completed',
-    }
-];
-
-// Data fetching function
-const fetchOrders = async (): Promise<Order[]> => {
-    try {
-        // Simulating API request, replace with actual API fetch logic later
-        const response = await fetch('/api/orders'); // Placeholder for API
-        if (response.ok) {
-            const data = await response.json();
-            return data; // Expected to be an array of orders
-        } else {
-            throw new Error('Failed to fetch orders');
-        }
-    } catch (error) {
-        console.error('Error fetching orders:', error);
-        return sampleOrders; // Return sample data as fallback
-    }
-};
+import React, { useState } from 'react';
 
 const ORDERS_PER_PAGE = 2;
 
 const OrdersPage: React.FC = () => {
-    const [orders, setOrders] = useState<Order[]>([]);
-    const [loading, setLoading] = useState<boolean>(true); // Loading state
-    const [error, setError] = useState<string | null>(null); // Error state
     const [currentPage, setCurrentPage] = useState(1);
     const [statusFilter, setStatusFilter] = useState('');
     const [minAmount, setMinAmount] = useState('');
     const [maxAmount, setMaxAmount] = useState('');
     const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
 
-    // Use effect to fetch orders on component mount
-    useEffect(() => {
-        const loadOrders = async () => {
-            try {
-                const fetchedOrders = await fetchOrders();
-                setOrders(fetchedOrders);
-            } catch (err) {
-                setError('Failed to load orders');
-            } finally {
-                setLoading(false); // Loading done
-            }
-        };
+    // Build filters based on user inputs
+    const filters = {
+        status: statusFilter || undefined,
+        minTotalAmount: minAmount ? parseFloat(minAmount) : undefined,
+        maxTotalAmount: maxAmount ? parseFloat(maxAmount) : undefined,
+        startDate: dateRange.startDate || undefined,
+        endDate: dateRange.endDate || undefined,
+    };
 
-        loadOrders();
-    }, []);
+    const { data: orders = [], isLoading, isError, error } = useGetOrders(filters);
 
     const totalPages = Math.ceil(orders.length / ORDERS_PER_PAGE);
     const paginatedOrders = orders.slice((currentPage - 1) * ORDERS_PER_PAGE, currentPage * ORDERS_PER_PAGE);
 
     const handleCancelOrder = (orderId: string) => {
-        setOrders((prevOrders) =>
-            prevOrders.map((order) =>
-                order.id === orderId && order.status === 'Pending'
-                    ? { ...order, status: 'Cancelled' }
-                    : order
-            )
-        );
+        console.log(`Cancel Order ID: ${orderId}`);
     };
 
-    const handleFilter = () => {
-        let filteredOrders = sampleOrders;
-
-        // Filter by status
-        if (statusFilter) {
-            filteredOrders = filteredOrders.filter((order) => order.status === statusFilter);
-        }
-
-        // Filter by amount range
-        if (minAmount || maxAmount) {
-            filteredOrders = filteredOrders.filter((order) => {
-                const min = parseFloat(minAmount) || 0;
-                const max = parseFloat(maxAmount) || Infinity;
-                return order.totalAmount >= min && order.totalAmount <= max;
-            });
-        }
-
-        // Filter by date range
-        if (dateRange.startDate || dateRange.endDate) {
-            const startDate = new Date(dateRange.startDate).getTime() || -Infinity;
-            const endDate = new Date(dateRange.endDate).getTime() || Infinity;
-            filteredOrders = filteredOrders.filter((order) => {
-                const createdDate = new Date(order.createdDate).getTime();
-                return createdDate >= startDate && createdDate <= endDate;
-            });
-        }
-
-        setOrders(filteredOrders);
-        setCurrentPage(1); // Reset to page 1 after filtering
-    };
-
-    if (loading) {
+    if (isLoading) {
         return <div className="text-center text-gray-500">Loading orders...</div>;
     }
 
-    if (error) {
-        return <div className="text-center text-red-500">{error}</div>;
+    if (isError) {
+        return <div className="text-center text-red-500">Error: {error instanceof Error ? error.message : 'Failed to load orders'}</div>;
     }
 
     return (
@@ -435,7 +111,6 @@ const OrdersPage: React.FC = () => {
                     </div>
 
                     <button
-                        onClick={handleFilter}
                         className="w-full bg-blue-400 text-white py-3 rounded-lg hover:bg-blue-500 transition duration-300 flex items-center justify-center gap-2"
                     >
                         <FunnelIcon className="h-5 w-5" /> Apply Filters
@@ -445,42 +120,50 @@ const OrdersPage: React.FC = () => {
                 {/* Display Orders */}
                 <div className="space-y-8">
                     {paginatedOrders.map((order) => (
-                        <div key={order.id} className="bg-white shadow-xl rounded-xl p-8 mb-8">
+                        <div key={order._id} className="bg-white shadow-xl rounded-xl p-8 mb-8">
                             <div className="flex justify-between items-start mb-6">
-                                <div className='flex flex-col gap-1'>
-                                    <p className="text-xl font-bold text-gray-800">Order ID: {order.id}</p>
-                                    <p className="text-sm text-gray-500">Created: {order.createdDate}</p>
-                                    <p className="text-sm text-gray-500">Updated: {order.updatedDate}</p>
+                                <div>
+                                    <p className="text-xl font-bold text-gray-800">Order ID: {order._id}</p>
+                                    <p className="text-sm text-gray-500">Created: {formatDateIfValid(order.createdDate)}</p>
+                                    <p className="text-sm text-gray-500">Updated: {formatDateIfValid(order.updatedDate)}</p>
                                 </div>
                                 <div
-                                    className={`py-1 px-5 rounded-full text-sm font-medium capitalize ${order.status === 'Completed'
-                                        ? 'bg-green-100 text-green-600'
-                                        : order.status === 'Pending'
+                                    className={`py-1 px-5 rounded-full text-sm font-medium capitalize ${
+                                        order.status === 'Completed'
+                                            ? 'bg-green-100 text-green-600'
+                                            : order.status === 'Pending'
                                             ? 'bg-yellow-100 text-yellow-600'
                                             : 'bg-red-100 text-red-600'
-                                        }`}
+                                    }`}
                                 >
                                     {order.status}
                                 </div>
                             </div>
 
+                            {/* Products */}
                             <div className="border-t pt-6">
                                 <p className="text-xl font-bold text-gray-800 mb-3">Products</p>
                                 <ul className="space-y-1">
                                     {order.products.map((product, index) => (
                                         <li key={index} className="flex justify-between py-2 text-gray-700">
-                                            <span>{product.name} - <span className="font-medium text-gray-900">${product.price}</span></span>
+                                            <span>
+                                                {product.productId.name} -{' '}
+                                                <span className="font-medium text-gray-900">${product.price}</span>
+                                            </span>
                                             <span className="font-semibold text-gray-900">x{product.quantity}</span>
                                         </li>
                                     ))}
                                 </ul>
                             </div>
 
+                            {/* Total and Cancel Button */}
                             <div className="mt-8 flex flex-col gap-4 items-end">
-                                <p className="text-xl font-semibold text-gray-800">Total: <span className="font-bold text-blue-600">${order.totalAmount}</span></p>
+                                <p className="text-xl font-semibold text-gray-800">
+                                    Total: <span className="font-bold text-blue-600">${order.totalAmount}</span>
+                                </p>
                                 {order.status === 'Pending' && (
                                     <button
-                                        onClick={() => handleCancelOrder(order.id)}
+                                        onClick={() => handleCancelOrder(order._id)}
                                         className="bg-red-500 text-white py-2 px-6 rounded-lg shadow-md hover:bg-red-600 transition-all duration-300"
                                     >
                                         Cancel
@@ -488,7 +171,7 @@ const OrdersPage: React.FC = () => {
                                 )}
                             </div>
 
-                            {/* Payment and Deliver Details */}
+                            {/* Payment and Delivery Details */}
                             <div className="mt-8 transition-all w-full flex justify-between border-t pt-6">
                                 <div className="mt-4 flex-1">
                                     <div className="flex items-center mb-4">
@@ -512,10 +195,14 @@ const OrdersPage: React.FC = () => {
                                         <h3 className="text-lg font-semibold text-gray-700">Delivery Details</h3>
                                     </div>
                                     <p className="text-gray-600">
-                                        Destination: <span className="font-medium text-gray-800">{order.deliveryDetails.destination}</span>
+                                        Destination:{' '}
+                                        <span className="font-medium text-gray-800">{order.deliveryDetails.destination}</span>
                                     </p>
                                     <p className="text-gray-600">
-                                        Recipient: <span className="font-medium text-gray-800">{order.deliveryDetails.recipientName} - {order.deliveryDetails.recipientPhone}</span>
+                                        Recipient:{' '}
+                                        <span className="font-medium text-gray-800">
+                                            {order.deliveryDetails.recipientName} - {order.deliveryDetails.recipientPhone}
+                                        </span>
                                     </p>
                                     <p className="text-gray-600">
                                         Tracking: <span className="font-medium text-gray-800">{order.deliveryDetails.tracking}</span>
@@ -525,7 +212,6 @@ const OrdersPage: React.FC = () => {
                                     </p>
                                 </div>
                             </div>
-
                         </div>
                     ))}
                 </div>
