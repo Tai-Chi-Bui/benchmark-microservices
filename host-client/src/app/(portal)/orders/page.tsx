@@ -109,12 +109,6 @@ const OrdersPage: React.FC = () => {
                             </div>
                         </div>
                     </div>
-
-                    <button
-                        className="w-full bg-blue-400 text-white py-3 rounded-lg hover:bg-blue-500 transition duration-300 flex items-center justify-center gap-2"
-                    >
-                        <FunnelIcon className="h-5 w-5" /> Apply Filters
-                    </button>
                 </div>
 
                 {/* Display Orders */}
