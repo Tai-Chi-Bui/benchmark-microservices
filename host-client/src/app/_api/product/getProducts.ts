@@ -18,10 +18,32 @@ const productsSchema = z.array(productSchema);
 // Define the response type
 type GetProductsResponse = z.infer<typeof productsSchema>;
 
-// Define the function for fetching products
-const fetchProducts = async (): Promise<GetProductsResponse> => {
+// Define filters type
+type ProductFilters = {
+  name?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  quantity?: number;
+};
+
+// Utility to construct query parameters
+const buildQueryParams = (filters: ProductFilters): string => {
+  const params = new URLSearchParams();
+  if (filters.name) params.append('name', filters.name);
+  if (filters.minPrice !== undefined) params.append('minPrice', filters.minPrice.toString());
+  if (filters.maxPrice !== undefined) params.append('maxPrice', filters.maxPrice.toString());
+  if (filters.quantity !== undefined) params.append('quantity', filters.quantity.toString());
+  return params.toString();
+};
+
+// Define the function for fetching products with filters
+const fetchProducts = async (filters: ProductFilters = {}): Promise<GetProductsResponse> => {
+  // Build query string from filters
+  const queryParams = buildQueryParams(filters);
+  const url = queryParams ? `${endpoints.product.getProducts}?${queryParams}` : endpoints.product.getProducts;
+
   // Perform the fetch products API request
-  const response = await apiFetch<GetProductsResponse>(endpoints.product.getProducts, {
+  const response = await apiFetch<GetProductsResponse>(url, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -38,9 +60,9 @@ const fetchProducts = async (): Promise<GetProductsResponse> => {
 };
 
 // Custom hook using TanStack Query's useQuery for fetching products
-export const useGetProducts = (): UseQueryResult<GetProductsResponse, Error> => {
+export const useGetProducts = (filters: ProductFilters = {}): UseQueryResult<GetProductsResponse, Error> => {
   return useQuery<GetProductsResponse, Error>({
-    queryKey: ['getProducts'],
-    queryFn: fetchProducts, // Pass the query function here
+    queryKey: ['getProducts', filters], // Include filters in the query key
+    queryFn: () => fetchProducts(filters), // Pass the query function with filters
   });
 };

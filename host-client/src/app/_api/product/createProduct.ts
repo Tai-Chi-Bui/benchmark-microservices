@@ -30,7 +30,7 @@ const createProductHandler = async (formData: FormData): Promise<CreateProductRe
   }
 
   // Perform the create product API request
-  return apiFetch<CreateProductResponse>(endpoints.product.createProduct, {
+  return apiFetch<CreateProductResponse>(endpoints.product.getProducts, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: { name, price, description },
