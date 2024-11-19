@@ -1,5 +1,6 @@
 const OrdersService = require("../services/orderService.js");
 const messageBroker = require("../utils/messageBroker"); // RabbitMQ broker
+const convertStringIdsToObjectId = require("../utils/convertStringIdsToObjectId"); // RabbitMQ broker
 
 /**
  * Class to hold the API implementation for the order services
@@ -14,7 +15,6 @@ class OrderController {
     this.getOrders = this.getOrders.bind(this);
     this.getOrdersByStatus = this.getOrdersByStatus.bind(this);
     this.updateOrderStatus = this.updateOrderStatus.bind(this);
-    this.updatePaymentStatus = this.updatePaymentStatus.bind(this);
   }
 
   // Method to create a new order
@@ -25,7 +25,7 @@ class OrderController {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const createdOrder = await this.ordersService.createOrder(req.body);
+      const createdOrder = await this.ordersService.createOrder(convertStringIdsToObjectId(req.body));
       res.status(201).json(createdOrder);
     } catch (error) {
       console.error('Error creating order:', error.message);
@@ -98,7 +98,7 @@ class OrderController {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const { orderId, newStatus } = req.body;
+      const { orderId, newStatus } = convertStringIdsToObjectId(req.body);
       const updatedOrder = await this.ordersService.updateOrderStatus(orderId, newStatus);
 
       // Check if the order is marked as completed
@@ -123,23 +123,6 @@ class OrderController {
       res.status(200).json(updatedOrder);
     } catch (error) {
       console.error('Error updating order status:', error.message);
-      res.status(500).json({ message: "Server error" });
-    }
-  }
-
-  // Method to update payment status
-  async updatePaymentStatus(req, res, next) {
-    try {
-      const token = req.headers.authorization;
-      if (!token) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const { orderId, paymentStatus } = req.body;
-      const updatedOrder = await this.ordersService.updatePaymentStatus(orderId, paymentStatus);
-      res.status(200).json(updatedOrder);
-    } catch (error) {
-      console.error('Error updating payment status:', error.message);
       res.status(500).json({ message: "Server error" });
     }
   }

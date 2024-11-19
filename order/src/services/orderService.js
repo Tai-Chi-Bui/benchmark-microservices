@@ -72,18 +72,6 @@ class OrdersService {
       throw new Error('Failed to update order status');
     }
   }
-
-  // Service method to update payment status
-  async updatePaymentStatus(orderId, paymentStatus) {
-    try {
-      // Add validation for payment status if needed
-      const updatedOrder = await this.ordersRepository.updatePaymentStatus(orderId, paymentStatus);
-      return updatedOrder;
-    } catch (error) {
-      console.error('Error updating payment status:', error.message);
-      throw new Error('Failed to update payment status');
-    }
-  }
 }
 
 module.exports = OrdersService;

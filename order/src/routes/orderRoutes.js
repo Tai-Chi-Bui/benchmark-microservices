@@ -14,13 +14,7 @@ router.get("/", isAuthenticated, orderController.getOrders);
 // Fetch a single order by ID
 router.get("/:orderId", isAuthenticated, orderController.getOrderById);
 
-// Fetch orders by status (using query param, e.g., /orders?status=Pending)
-router.get("/status", isAuthenticated, orderController.getOrdersByStatus);
-
 // Update order status (e.g., mark as Completed or Cancelled)
 router.patch("/status", isAuthenticated, orderController.updateOrderStatus);
-
-// Update payment status (e.g., mark payment as Received)
-router.patch("/payment", isAuthenticated, orderController.updatePaymentStatus);
 
 module.exports = router;

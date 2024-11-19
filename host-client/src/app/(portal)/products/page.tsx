@@ -102,7 +102,7 @@ const ProductList = () => {
                     ? 'bg-gray-400 cursor-not-allowed opacity-70'
                     : 'bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 hover:scale-105'
                   }`}
-                onClick={() => addToCart({_id: product._id, name: product.name})}
+                onClick={() => addToCart({_id: product._id, name: product.name, price: product.price})}
                 disabled={isAdding === product._id || product.quantity === 0}
               >
                 {isAdding === product._id ? 'Adding...' : 'Add to cart'}

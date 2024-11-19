@@ -1,6 +1,14 @@
-import React, { useState } from 'react';
-import { CheckCircleIcon, PhoneIcon, MapPinIcon, CreditCardIcon, BanknotesIcon, XMarkIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
+'use client'
+import React, { useEffect, useState } from 'react';
+import Cookies from 'js-cookie';
+import {
+    CheckCircleIcon,
+    XMarkIcon,
+    CurrencyDollarIcon,
+} from '@heroicons/react/24/outline';
 import toast, { Toaster } from 'react-hot-toast';
+import { createOrder } from '@/app/_api/order/createOrder'; // Adjust import path as needed
+import { CartItem } from './page';
 
 interface OrderModalProps {
     isOpen: boolean;
@@ -11,26 +19,67 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose }) => {
     const [recipientName, setRecipientName] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [address, setAddress] = useState('');
-    const [paymentMethod, setPaymentMethod] = useState('cash');
+    const [paymentMethod, setPaymentMethod] = useState('Cash');
+    const [isLoading, setIsLoading] = useState(false);
+    const [cartItems, setCartItems] = useState<any>()
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!recipientName || !phoneNumber || !address) {
-            toast.error(`Please fill out all required fields.`);
+            toast.error('Please fill out all required fields.');
             return;
         }
-        // Simulate order submission
-        toast.success(
-            <div>
-                <strong>Order placed successfully!</strong>
-                <p>Name: <span className="font-medium">{recipientName}</span></p>
-                <p>Phone: <span className="font-medium">{phoneNumber}</span></p>
-                <p>Address: <span className="font-medium">{address}</span></p>
-                <p>Payment: <span className="font-medium capitalize">{paymentMethod}</span></p>
-            </div>
-        );
 
-        onClose();
+        const orderData = {
+            products: [...cartItems],
+            totalAmount: 730, // Replace with calculated total in future
+            paymentDetails: {
+                method: paymentMethod,
+                status: 'Pending',
+                reference: paymentMethod === 'Cash' ? undefined : 'PAY12345', // Simulated reference
+            },
+            deliveryDetails: {
+                recipientName,
+                recipientPhone: phoneNumber,
+                destination: address,
+                tracking: 'Warehouse',
+                status: 'Pending',
+            },
+            status: 'Pending',
+        };
+
+        try {
+            setIsLoading(true);
+            await createOrder(orderData);
+            toast.success('Order placed successfully!');
+            onClose();
+            Cookies.remove("cart")
+        } catch (error) {
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : 'Failed to place order. Please try again.'
+            );
+        } finally {
+            setIsLoading(false);
+        }
     };
+
+    useEffect(() => {
+        const cartItems = Cookies.get("cart")
+        const parsedCartItems = cartItems ? JSON.parse(cartItems) : []
+        if (parsedCartItems?.length) {
+            const filterdCartItems = parsedCartItems.map((item : CartItem) => {
+                return {
+                    productId: item._id,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity
+                }
+            })
+            console.log("filterdCartItems", filterdCartItems)
+            setCartItems([...filterdCartItems])
+        }
+    },[])
 
     if (!isOpen) return null;
 
@@ -49,9 +98,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose }) => {
                 </h2>
 
                 <div className="mb-5">
-                    <label className="block text-sm font-medium mb-2 flex items-center space-x-2">
-                        <span>Recipient Name</span>
-                    </label>
+                    <label className="block text-sm font-medium mb-2">Recipient Name</label>
                     <input
                         type="text"
                         value={recipientName}
@@ -62,10 +109,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose }) => {
                 </div>
 
                 <div className="mb-5">
-                    <label className="block text-sm font-medium mb-2 flex items-center space-x-2">
-                        <PhoneIcon className="h-5 w-5 text-gray-500" />
-                        <span>Phone Number</span>
-                    </label>
+                    <label className="block text-sm font-medium mb-2">Phone Number</label>
                     <input
                         type="text"
                         value={phoneNumber}
@@ -76,10 +120,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose }) => {
                 </div>
 
                 <div className="mb-5">
-                    <label className="block text-sm font-medium mb-2 flex items-center space-x-2">
-                        <MapPinIcon className="h-5 w-5 text-gray-500" />
-                        <span>Destination Address</span>
-                    </label>
+                    <label className="block text-sm font-medium mb-2">Destination Address</label>
                     <textarea
                         value={address}
                         onChange={(e) => setAddress(e.target.value)}
@@ -89,51 +130,21 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose }) => {
                 </div>
 
                 <div className="mb-5">
-                    <label className="block text-sm font-medium mb-2 flex items-center space-x-2">
-                        <span>Payment Method</span>
-                    </label>
+                    <label className="block text-sm font-medium mb-2">Payment Method</label>
                     <div className="space-y-3">
                         <div className="flex items-center">
                             <input
                                 type="radio"
-                                id="cash"
+                                id="Cash"
                                 name="payment"
-                                value="cash"
-                                checked={paymentMethod === 'cash'}
-                                onChange={() => setPaymentMethod('cash')}
+                                value="Cash"
+                                checked={paymentMethod === 'Cash'}
+                                onChange={() => setPaymentMethod('Cash')}
                                 className="mr-2"
                             />
-                            <label htmlFor="cash" className="text-gray-600 flex items-center space-x-2">
+                            <label htmlFor="Cash" className="text-gray-600 flex items-center space-x-2">
                                 <CurrencyDollarIcon className="h-5 w-5" />
                                 <span>Cash</span>
-                            </label>
-                        </div>
-                        <div className="flex items-center text-gray-400">
-                            <input
-                                type="radio"
-                                id="credit-card"
-                                name="payment"
-                                value="credit-card"
-                                disabled
-                                className="mr-2"
-                            />
-                            <label htmlFor="credit-card" className="text-gray-300 flex items-center space-x-2">
-                                <CreditCardIcon className="h-5 w-5" />
-                                <span>Credit Card (Incoming feature)</span>
-                            </label>
-                        </div>
-                        <div className="flex items-center text-gray-400">
-                            <input
-                                type="radio"
-                                id="bank-transfer"
-                                name="payment"
-                                value="bank-transfer"
-                                disabled
-                                className="mr-2"
-                            />
-                            <label htmlFor="bank-transfer" className="text-gray-300 flex items-center space-x-2">
-                                <BanknotesIcon className="h-5 w-5" />
-                                <span>Bank Transfer (Incoming feature)</span>
                             </label>
                         </div>
                     </div>
@@ -143,14 +154,18 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose }) => {
                     <button
                         onClick={onClose}
                         className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                        disabled={isLoading}
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleSubmit}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                        className={`bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 ${
+                            isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                        disabled={isLoading}
                     >
-                        Confirm Order
+                        {isLoading ? 'Placing Order...' : 'Confirm Order'}
                     </button>
                 </div>
             </div>

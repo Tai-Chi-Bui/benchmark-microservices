@@ -8,9 +8,11 @@ import CartItemComponent from './CartItemComponent'; // Import the new component
 import OrderModal from './OrderModal'; // Import the modal component
 
 // Define CartItem type
-interface CartItem {
+export interface CartItem {
   _id: string;
   quantity: number;
+  name: string;
+  price: number
 }
 
 const CartPage = () => {
@@ -22,7 +24,7 @@ const CartPage = () => {
   useEffect(() => {
     const savedCart = Cookies.get('cart');
     setCartItems(savedCart ? JSON.parse(savedCart) : []);
-  }, []);
+  }, [isModalOpen]);
 
   // Memoize the function to avoid recreating it on each render
   const updateItemTotal = useCallback((id: string, itemTotal: number) => {

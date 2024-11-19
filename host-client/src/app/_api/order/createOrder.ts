@@ -41,13 +41,13 @@ const createOrder = async (orderData: CreateOrderRequest): Promise<void> => {
     throw new Error(errorMessage || 'Request validation failed');
   }
 
-  // Perform the POST request
+  // Perform the POST request with stringified body
   await apiFetch<void>(endpoints.order.getOrders, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: orderData, // Stringify the request body
+    body: orderData, // Correctly stringifying the request body
   });
 };
 
