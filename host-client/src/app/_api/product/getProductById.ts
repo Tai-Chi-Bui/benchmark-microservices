@@ -19,7 +19,7 @@ type GetProductResponse = z.infer<typeof productSchema>;
 // Define the function for fetching a product by ID
 const fetchProductById = async (productId: string): Promise<GetProductResponse> => {
   // Perform the fetch product by ID API request
-  const response = await apiFetch<GetProductResponse>(`${endpoints.product.getProductById}/${productId}`, {
+  const response = await apiFetch<GetProductResponse>(`${endpoints.product.getProducts}/${productId}`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });

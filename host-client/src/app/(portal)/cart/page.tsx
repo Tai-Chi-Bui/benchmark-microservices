@@ -5,22 +5,26 @@ import Cookies from 'js-cookie';
 import Link from 'next/link';
 import { ShoppingBagIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import CartItemComponent from './CartItemComponent'; // Import the new component
+import OrderModal from './OrderModal'; // Import the modal component
 
 // Define CartItem type
-interface CartItem {
+export interface CartItem {
   _id: string;
   quantity: number;
+  name: string;
+  price: number
 }
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [itemTotals, setItemTotals] = useState<{ [key: string]: number }>({});
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal
 
   // Load cart items from cookies
   useEffect(() => {
     const savedCart = Cookies.get('cart');
     setCartItems(savedCart ? JSON.parse(savedCart) : []);
-  }, []);
+  }, [isModalOpen]);
 
   // Memoize the function to avoid recreating it on each render
   const updateItemTotal = useCallback((id: string, itemTotal: number) => {
@@ -96,11 +100,11 @@ const CartPage = () => {
               Total: ${totalAmount.toFixed(2)}
             </p>
           </div>
-          {/* Order button (disabled for now) */}
+          {/* Order button to open modal */}
           <div className="mt-6 text-right">
             <button
-              className="bg-gray-300 text-white py-2 px-6 rounded-md shadow-md cursor-not-allowed"
-              disabled
+              onClick={() => setIsModalOpen(true)} // Open modal
+              className="bg-blue-500 text-white py-2 px-6 rounded-md shadow-md hover:bg-blue-600"
             >
               Place an order
             </button>
@@ -108,12 +112,19 @@ const CartPage = () => {
         </div>
       )}
 
+      {/* Continue shopping button */}
       <div className="mt-8 flex justify-end">
         <Link href="/products" className="inline-block bg-blue-500 text-white py-2 px-6 rounded-md shadow-md hover:bg-blue-600 transition duration-300 ease-in-out flex items-center">
           <ArrowLeftIcon className="h-5 w-5 mr-1" />
           Continue Shopping
         </Link>
       </div>
+
+      {/* Order modal */}
+      <OrderModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 };

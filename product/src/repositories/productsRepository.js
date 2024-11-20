@@ -27,6 +27,38 @@ class ProductsRepository {
     }
   }
 
+  async reduceQuantityById(productId, quantityToReduce) {
+    try {
+      // Find the product by its ID
+      const product = await Product.findById(productId);
+  
+      // If product not found, throw an error
+      if (!product) {
+        throw new Error(`Product with ID ${productId} not found`);
+      }
+  
+      // Check if there's enough quantity to reduce
+      if (product.quantity < quantityToReduce) {
+        throw new Error(
+          `Insufficient quantity for product with ID ${productId}. Available: ${product.quantity}, Requested: ${quantityToReduce}`
+        );
+      }
+  
+      // Reduce the quantity
+      product.quantity -= quantityToReduce;
+  
+      // Save the updated product to the database
+      await product.save();
+  
+      // Return the updated product as a plain JavaScript object
+      return product.toObject();
+    } catch (error) {
+      console.error('Error reducing product quantity:', error);
+      throw new Error('Failed to reduce product quantity');
+    }
+  }
+  
+
   async findAll() {
     try {
       const products = await Product.find().lean(); // Use lean for performance

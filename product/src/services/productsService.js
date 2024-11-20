@@ -61,8 +61,7 @@ class ProductsService {
     }
   }
 
-
-  // New service method to apply a discount to a product
+  // Service method to apply a discount to a product
   async applyDiscountToProduct(productId, discount) {
     try {
       // Validate discount (ensure it's a number between 0 and 1)
@@ -77,6 +76,20 @@ class ProductsService {
       throw new Error('Failed to apply discount');
     }
   }
+
+  // New method to reduce product quantities based on an order's products
+  async reduceProductQuantities(orderProducts) {
+    try {
+      for (const product of orderProducts) {
+        const { productId, quantity } = product;
+        await this.productsRepository.reduceQuantityById(productId, quantity)
+      }
+    } catch (error) {
+      console.error('Error reducing product quantities:', error.message);
+      throw new Error('Failed to reduce product quantities');
+    }
+  }
+
 }
 
 module.exports = ProductsService;

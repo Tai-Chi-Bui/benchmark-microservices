@@ -25,10 +25,4 @@ router.get("/price-range", isAuthenticated, productController.getProductsByPrice
 // Apply discount to a product
 router.post("/discount", isAuthenticated, productController.applyDiscountToProduct);
 
-// Create a new order
-router.post("/buy", isAuthenticated, productController.createOrder);
-
-// Get order status by orderId
-router.get("/order/:orderId/status", isAuthenticated, productController.getOrderStatus);
-
 module.exports = router;

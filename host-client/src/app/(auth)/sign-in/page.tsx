@@ -132,8 +132,8 @@ const SignIn = () => {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setShowModal(false)}>
+          <div className="bg-white p-6 rounded-lg shadow-lg" onClick={(e) => e.stopPropagation()}>
             <h3 className={`text-2xl font-medium mb-8 ${isError ? 'text-red-600' : 'text-blue-900'}`}>
               {modalMessage}
             </h3>

@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const config = require("./config");
-const MessageBroker = require("./utils/messageBroker");
+const setupMessageBrokerFunc = require("./utils/setupMessageBroker");
 const productsRouter = require("./routes/productRoutes");
 require("dotenv").config();
 
@@ -37,8 +37,11 @@ class App {
   }
 
   setupMessageBroker() {
-    MessageBroker.connect();
+    setupMessageBrokerFunc()
   }
+  
+  
+  
 
   start() {
     this.server = this.app.listen(3001, () =>
@@ -48,8 +51,10 @@ class App {
 
   async stop() {
     await mongoose.disconnect();
-    this.server.close();
-    console.log("Server stopped");
+    if (this.server) {
+      this.server.close();
+      console.log("Server stopped");
+    }
   }
 }
 
