@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const config = require("./config");
-const MessageBroker = require("./utils/messageBroker");
+const setupMessageBrokerFunc = require("./utils/setupMessageBroker");
 const productsRouter = require("./routes/productRoutes");
 require("dotenv").config();
 
@@ -37,22 +37,7 @@ class App {
   }
 
   setupMessageBroker() {
-    console.log("Waiting 30 seconds before connecting to RabbitMQ...");
-    new Promise((resolve) => setTimeout(resolve, 30000)) // 30-second delay
-      .then(() => MessageBroker.connect())
-      .then(() => {
-        console.log("RabbitMQ connection established. Setting up consumer...");
-        MessageBroker.consumeMessage("orders", (message) => {
-          console.log("Processing message:", message);
-          // Add your business logic here
-          if (message.orderId) {
-            console.log(`Processing order ID: ${message.orderId}`);
-          }
-        });
-      })
-      .catch((error) => {
-        console.error("Failed to setup RabbitMQ consumer:", error);
-      });
+    setupMessageBrokerFunc()
   }
   
   

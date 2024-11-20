@@ -15,12 +15,6 @@ class ProductController {
     this.getProductsByQuantityRange = this.getProductsByQuantityRange.bind(this);
     this.applyDiscountToProduct = this.applyDiscountToProduct.bind(this);
     this.getProducts = this.getProducts.bind(this);
-
-    // // Bind the method for message consumption
-    // this.consumeOrderCompletedMessage = this.consumeOrderCompletedMessage.bind(this);
-
-    // // Start consuming messages from RabbitMQ
-    // this.consumeOrderCompletedMessage();
   }
 
   async createProduct(req, res, next) {
@@ -130,26 +124,6 @@ class ProductController {
       res.status(500).json({ message: "Server error" });
     }
   }
-
-  // Consume RabbitMQ messages for reducing product quantities
-  // async consumeOrderCompletedMessage() {
-  //   try {
-  //     // Consume messages from RabbitMQ when an order is completed
-  //     await messageBroker.consumeMessage('orders', async (message) => {
-  //       if (message.event === 'ORDER_COMPLETED') {
-  //         console.log('Order completed message received:', message);
-
-  //         // Extract the product data from the message
-  //         const { products } = message;
-
-  //         // Call the service to reduce the product quantities
-  //         await this.productsService.reduceProductQuantities(products);
-  //       }
-  //     });
-  //   } catch (error) {
-  //     console.error('Error consuming order completed message:', error.message);
-  //   }
-  // }
 }
 
 module.exports = ProductController;

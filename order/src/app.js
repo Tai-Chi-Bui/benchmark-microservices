@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const config = require("./config");
-const MessageBroker = require("./utils/messageBroker");
+const setupMessageBrokerFunc = require("./utils/setupMessageBroker");
 const ordersRouter = require("./routes/orderRoutes");
 require("dotenv").config();
 
@@ -37,19 +37,8 @@ class App {
   }
 
   async setupMessageBroker() {
-    try {
-      console.log("Waiting few seconds before connecting to RabbitMQ...");
-      await new Promise((resolve) => setTimeout(resolve, 30000));
-      
-      await MessageBroker.connect();
-    } catch (error) {
-      console.error("Failed to setup RabbitMQ consumer:", error);
-    }
+    setupMessageBrokerFunc()
   }
-
-  // setupMessageBroker() {
-  //   MessageBroker.connect();
-  // }
 
   start() {
     this.server = this.app.listen(3002, () =>

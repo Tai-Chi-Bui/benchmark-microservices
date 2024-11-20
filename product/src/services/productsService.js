@@ -82,25 +82,7 @@ class ProductsService {
     try {
       for (const product of orderProducts) {
         const { productId, quantity } = product;
-
-        // Fetch the product from the repository
-        const existingProduct = await this.productsRepository.findById(productId);
-
-        if (!existingProduct) {
-          console.error(`Product with ID ${productId} not found`);
-          continue;
-        }
-
-        // Check if there is enough stock to fulfill the order
-        if (existingProduct.quantity < quantity) {
-          console.error(`Not enough quantity for product ${existingProduct.name}`);
-          continue;
-        }
-
-        // Reduce the product quantity
-        existingProduct.quantity -= quantity;
-        await existingProduct.save();
-        console.log(`Reduced quantity of product ${existingProduct.name} by ${quantity}`);
+        await this.productsRepository.reduceQuantityById(productId, quantity)
       }
     } catch (error) {
       console.error('Error reducing product quantities:', error.message);
