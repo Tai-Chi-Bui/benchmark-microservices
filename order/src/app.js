@@ -36,9 +36,20 @@ class App {
     this.app.use("/", ordersRouter);
   }
 
-  setupMessageBroker() {
-    MessageBroker.connect();
+  async setupMessageBroker() {
+    try {
+      console.log("Waiting few seconds before connecting to RabbitMQ...");
+      await new Promise((resolve) => setTimeout(resolve, 30000));
+      
+      await MessageBroker.connect();
+    } catch (error) {
+      console.error("Failed to setup RabbitMQ consumer:", error);
+    }
   }
+
+  // setupMessageBroker() {
+  //   MessageBroker.connect();
+  // }
 
   start() {
     this.server = this.app.listen(3002, () =>

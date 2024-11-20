@@ -1,5 +1,4 @@
 const ProductsRepository = require("../repositories/productsRepository");
-const messageBroker = require("../utils/messageBroker"); // RabbitMQ broker
 
 /**
  * Class that ties together the business logic and the data access layer
@@ -7,9 +6,6 @@ const messageBroker = require("../utils/messageBroker"); // RabbitMQ broker
 class ProductsService {
   constructor() {
     this.productsRepository = new ProductsRepository();
-
-    // Start consuming RabbitMQ messages
-    this.consumeOrderCompletedMessage();
   }
 
   async createProduct(product) {
@@ -112,25 +108,6 @@ class ProductsService {
     }
   }
 
-  // New method to consume messages from RabbitMQ when an order is completed
-  async consumeOrderCompletedMessage() {
-    try {
-      // Consume messages from RabbitMQ
-      await messageBroker.consumeMessage('productService', async (message) => {
-        if (message.event === 'ORDER_COMPLETED') {
-          console.log('Order completed message received:', message);
-
-          // Extract the product data from the message
-          const { products } = message;
-
-          // Call the service to reduce the product quantities
-          await this.reduceProductQuantities(products);
-        }
-      });
-    } catch (error) {
-      console.error('Error consuming order completed message:', error.message);
-    }
-  }
 }
 
 module.exports = ProductsService;

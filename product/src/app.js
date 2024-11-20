@@ -37,8 +37,26 @@ class App {
   }
 
   setupMessageBroker() {
-    MessageBroker.connect();
+    console.log("Waiting 30 seconds before connecting to RabbitMQ...");
+    new Promise((resolve) => setTimeout(resolve, 30000)) // 30-second delay
+      .then(() => MessageBroker.connect())
+      .then(() => {
+        console.log("RabbitMQ connection established. Setting up consumer...");
+        MessageBroker.consumeMessage("orders", (message) => {
+          console.log("Processing message:", message);
+          // Add your business logic here
+          if (message.orderId) {
+            console.log(`Processing order ID: ${message.orderId}`);
+          }
+        });
+      })
+      .catch((error) => {
+        console.error("Failed to setup RabbitMQ consumer:", error);
+      });
   }
+  
+  
+  
 
   start() {
     this.server = this.app.listen(3001, () =>
@@ -48,8 +66,10 @@ class App {
 
   async stop() {
     await mongoose.disconnect();
-    this.server.close();
-    console.log("Server stopped");
+    if (this.server) {
+      this.server.close();
+      console.log("Server stopped");
+    }
   }
 }
 
